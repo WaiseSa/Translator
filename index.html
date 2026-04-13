@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Voice Translator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: #0d0d0d;
+color: #f0f0f0;
+font-family: ‘Courier New’, monospace;
+min-height: 100dvh;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 24px 16px;
+gap: 32px;
+}
+
+h1 {
+font-size: 13px;
+letter-spacing: 6px;
+color: #555;
+text-transform: uppercase;
+text-align: center;
+}
+
+.orb-wrap {
+position: relative;
+width: 160px;
+height: 160px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.orb {
+width: 120px;
+height: 120px;
+border-radius: 50%;
+background: radial-gradient(circle at 35% 35%, #2a2a2a, #111);
+border: 2px solid #222;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 44px;
+cursor: pointer;
+position: relative;
+z-index: 2;
+transition: transform 0.2s;
+user-select: none;
+}
+
+.orb:hover { transform: scale(1.04); }
+
+.ring {
+position: absolute;
+border-radius: 50%;
+border: 1.5px solid transparent;
+}
+.ring1 { width: 136px; height: 136px; }
+.ring2 { width: 152px; height: 152px; }
+.ring3 { width: 168px; height: 168px; }
+
+.orb-wrap.listening .ring1 { border-color: rgba(0,200,120,0.5); animation: pulse-ring 1.5s ease-out infinite; }
+.orb-wrap.listening .ring2 { border-color: rgba(0,200,120,0.3); animation: pulse-ring 1.5s ease-out infinite 0.3s; }
+.orb-wrap.listening .ring3 { border-color: rgba(0,200,120,0.15); animation: pulse-ring 1.5s ease-out infinite 0.6s; }
+.orb-wrap.speaking .ring1  { border-color: rgba(80,140,255,0.5); animation: pulse-ring 1s ease-out infinite; }
+.orb-wrap.speaking .ring2  { border-color: rgba(80,140,255,0.3); animation: pulse-ring 1s ease-out infinite 0.2s; }
+.orb-wrap.speaking .ring3  { border-color: rgba(80,140,255,0.15); animation: pulse-ring 1s ease-out infinite 0.4s; }
+
+@keyframes pulse-ring {
+0%   { transform: scale(1); opacity: 1; }
+100% { transform: scale(1.15); opacity: 0; }
+}
+
+.status { font-size: 12px; letter-spacing: 3px; text-align: center; min-height: 18px; color: #444; text-transform: uppercase; }
+.status.listening { color: #00c878; }
+.status.speaking  { color: #508cff; }
+.status.thinking  { color: #f0c040; }
+.status.error     { color: #ff4d6d; }
+
+.lang-badge {
+font-size: 11px; letter-spacing: 2px; padding: 5px 14px;
+border-radius: 999px; border: 1px solid #333; color: #666;
+transition: all 0.3s; min-height: 28px; display: flex; align-items: center; gap: 6px;
+}
+.lang-badge.pt { border-color: #2a6a40; color: #4dbd7a; background: rgba(0,160,80,0.07); }
+.lang-badge.en { border-color: #2a3a6a; color: #6a9aff; background: rgba(60,100,255,0.07); }
+
+.boxes { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+
+.box { background: #141414; border: 1px solid #1e1e1e; border-radius: 14px; padding: 14px 16px; min-height: 64px; }
+.box-label { font-size: 9px; letter-spacing: 4px; color: #3a3a3a; text-transform: uppercase; margin-bottom: 8px; }
+.box-text { font-size: 15px; line-height: 1.6; color: #ccc; min-height: 24px; }
+.box-text.dim { color: #333; font-size: 13px; }
+.box.translation { border-color: #1a2840; }
+.box.translation .box-label { color: #2a4a80; }
+.box.translation .box-text { color: #7aadff; }
+
+.hint { font-size: 11px; color: #333; letter-spacing: 1px; text-align: center; }
+.interim { color: #444; font-style: italic; }
+</style>
+
+</head>
+<body>
+
+<h1>🌐 Voice Translator</h1>
+
+<div class="orb-wrap" id="orbWrap">
+  <div class="ring ring1"></div>
+  <div class="ring ring2"></div>
+  <div class="ring ring3"></div>
+  <div class="orb" id="orb" onclick="toggleListen()">🎙️</div>
+</div>
+
+<div class="status" id="status">Tap to start</div>
+<div class="lang-badge" id="langBadge">— detecting language —</div>
+
+<div class="boxes">
+  <div class="box">
+    <div class="box-label">Heard</div>
+    <div class="box-text dim" id="heardText">Speak in Portuguese or English...</div>
+  </div>
+  <div class="box translation">
+    <div class="box-label">🔊 English Translation</div>
+    <div class="box-text dim" id="translatedText">Translation will appear here...</div>
+  </div>
+</div>
+
+<div class="hint">tap orb to start · auto-detects language</div>
+
+<script>
+  const orbWrap = document.getElementById('orbWrap');
+  const orb = document.getElementById('orb');
+  const statusEl = document.getElementById('status');
+  const langBadge = document.getElementById('langBadge');
+  const heardText = document.getElementById('heardText');
+  const translatedText = document.getElementById('translatedText');
+
+  let recognition = null;
+  let isListening = false;
+  let isSpeaking = false;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    statusEl.textContent = 'Browser not supported';
+    statusEl.className = 'status error';
+    orb.textContent = '❌';
+  }
+
+  function setStatus(text, cls) { statusEl.textContent = text; statusEl.className = 'status ' + (cls || ''); }
+
+  function setOrb(state) {
+    orbWrap.className = 'orb-wrap ' + state;
+    orb.textContent = state === 'speaking' ? '🔊' : '🎙️';
+  }
+
+  function detectLanguage(text) {
+    const ptPatterns = /\b(eu|você|ele|ela|nós|eles|mas|não|com|para|uma|isso|esse|esta|como|mais|por|muito|quando|então|que|em|de|do|da|no|na|ao|às|um|os|as|seu|sua|meu|minha|tem|são|está|foi|ser|ter|fazer|quero|preciso|obrigado|obrigada|sim|bom|boa|tudo|bem|olá|oi|tchau|falar|dizer|aqui|hoje|amanhã|sempre|nunca|também|ainda|já|agora|depois|antes|porque)\b/i;
+    const ptChars = /[ãõâêîôûàáéíóúç]/i;
+    const score = (ptPatterns.test(text) ? 2 : 0) + (ptChars.test(text) ? 3 : 0);
+    return score >= 2 ? 'pt-BR' : 'en-US';
+  }
+
+  function showLang(lang) {
+    if (lang === 'pt-BR') { langBadge.textContent = '🇧🇷 Português detectado'; langBadge.className = 'lang-badge pt'; }
+    else { langBadge.textContent = '🇺🇸 English detected'; langBadge.className = 'lang-badge en'; }
+  }
+
+  async function translateAndSpeak(text, fromLang) {
+    if (!text.trim()) return;
+    if (fromLang === 'en-US') { translatedText.textContent = text; translatedText.className = 'box-text'; speak(text); return; }
+
+    setStatus('Translating...', 'thinking');
+    translatedText.textContent = '...';
+    translatedText.className = 'box-text dim';
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 300,
+          messages: [{ role: 'user', content: `Translate this Brazilian Portuguese to English. Return ONLY the translation:\n\n${text}` }]
+        })
+      });
+      const data = await res.json();
+      const translated = data?.content?.[0]?.text?.trim() || 'Translation failed';
+      translatedText.textContent = translated;
+      translatedText.className = 'box-text';
+      speak(translated);
+    } catch (e) {
+      translatedText.textContent = 'Translation error';
+      translatedText.className = 'box-text';
+      setStatus('Error', 'error');
+    }
+  }
+
+  function speak(text) {
+    if (!text) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'en-US'; utt.rate = 0.95; utt.pitch = 1;
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Samantha') || v.name.includes('Google US') || v.name.includes('Daniel'))) || voices.find(v => v.lang.startsWith('en'));
+    if (preferred) utt.voice = preferred;
+    utt.onstart = () => { isSpeaking = true; setOrb('speaking'); setStatus('Speaking...', 'speaking'); };
+    utt.onend = () => {
+      isSpeaking = false;
+      if (isListening) { setOrb('listening'); setStatus('Listening...', 'listening'); restartRecognition(); }
+      else { setOrb(''); setStatus('Tap to start', ''); }
+    };
+    window.speechSynthesis.speak(utt);
+  }
+
+  function buildRecognition() {
+    const r = new SpeechRecognition();
+    r.continuous = false; r.interimResults = true; r.lang = 'pt-BR'; r.maxAlternatives = 1;
+    r.onstart = () => { setOrb('listening'); setStatus('Listening...', 'listening'); };
+    r.onresult = (e) => {
+      let interim = '', final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t; else interim += t;
+      }
+      if (interim) { heardText.innerHTML = `<span class="interim">${interim}</span>`; heardText.className = 'box-text'; }
+      if (final) {
+        heardText.textContent = final.trim(); heardText.className = 'box-text';
+        const detected = detectLanguage(final.trim());
+        showLang(detected);
+        translateAndSpeak(final.trim(), detected);
+      }
+    };
+    r.onerror = (e) => { if (e.error === 'no-speech' || e.error === 'aborted') return; setStatus('Mic error: ' + e.error, 'error'); };
+    r.onend = () => { if (isListening && !isSpeaking) setTimeout(restartRecognition, 200); };
+    return r;
+  }
+
+  function restartRecognition() {
+    if (!isListening || isSpeaking) return;
+    recognition = buildRecognition();
+    try { recognition.start(); } catch(e) {}
+  }
+
+  function toggleListen() {
+    if (!SpeechRecognition) return;
+    if (isListening) {
+      isListening = false;
+      window.speechSynthesis.cancel();
+      if (recognition) recognition.abort();
+      setOrb(''); setStatus('Tap to start', '');
+      langBadge.textContent = '— detecting language —'; langBadge.className = 'lang-badge';
+    } else {
+      isListening = true;
+      window.speechSynthesis.getVoices();
+      restartRecognition();
+    }
+  }
+
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+</script>
+
+</body>
+</html>
