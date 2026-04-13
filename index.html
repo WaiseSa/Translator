@@ -358,11 +358,11 @@ padding-bottom:var(–safe-bot);
 // ── LANGUAGES ──────────────────────────────────────────────────────────
 // Note: iOS Safari SR support: en-US ✓, pt-BR ✓, fr-CA ✓, fa-IR ✓ (not fa-AF), es-US/es-MX ✓ (not es-DO)
 const LANGS = [
-  { id:'en', flag:'🇺🇸', name:'English',    sub:'United States',      sr:'en-US', tts:'en-US', tapHint:'tap to speak',        activeHint:'listening...',    stopHint:'tap to stop' },
-  { id:'pt', flag:'🇧🇷', name:'Português',  sub:'Brasil',             sr:'pt-BR', tts:'pt-BR', tapHint:'toque para falar',    activeHint:'ouvindo...',      stopHint:'toque para parar' },
-  { id:'fa', flag:'🇦🇫', name:'دری / فارسی',sub:'Afghanistan',        sr:'fa-IR', tts:'fa-IR', tapHint:'برای صحبت لمس کنید', activeHint:'در حال گوش دادن', stopHint:'لمس کنید تا متوقف شود' },
-  { id:'fr', flag:'🇨🇦', name:'Français',   sub:'Canada',             sr:'fr-CA', tts:'fr-CA', tapHint:'toucher pour parler', activeHint:'écoute...',       stopHint:'toucher pour arrêter' },
-  { id:'es', flag:'🇩🇴', name:'Español',    sub:'Rep. Dominicana',    sr:'es-US', tts:'es-US', tapHint:'toca para hablar',    activeHint:'escuchando...',   stopHint:'toca para parar' },
+  { id:'en', flag:'🇺🇸', name:'English',    sub:'United States',      sr:'en-US', tts:'en-US', mm:'en',    tapHint:'tap to speak',        activeHint:'listening...',    stopHint:'tap to stop' },
+  { id:'pt', flag:'🇧🇷', name:'Português',  sub:'Brasil',             sr:'pt-BR', tts:'pt-BR', mm:'pt-BR', tapHint:'toque para falar',    activeHint:'ouvindo...',      stopHint:'toque para parar' },
+  { id:'fa', flag:'🇦🇫', name:'دری / فارسی',sub:'Afghanistan',        sr:'fa-IR', tts:'fa-IR', mm:'fa',    tapHint:'برای صحبت لمس کنید', activeHint:'در حال گوش دادن', stopHint:'لمس کنید تا متوقف شود' },
+  { id:'fr', flag:'🇨🇦', name:'Français',   sub:'Canada',             sr:'fr-CA', tts:'fr-CA', mm:'fr-CA', tapHint:'toucher pour parler', activeHint:'écoute...',       stopHint:'toucher pour arrêter' },
+  { id:'es', flag:'🇩🇴', name:'Español',    sub:'Rep. Dominicana',    sr:'es-US', tts:'es-US', mm:'es',    tapHint:'toca para hablar',    activeHint:'escuchando...',   stopHint:'toca para parar' },
 ];
 
 // ── PHRASEBOOK ─────────────────────────────────────────────────────────
@@ -759,28 +759,27 @@ async function translate(side, text, isAuto) {
     } catch(e) { /* fall through to API */ }
   }
 
-  // 2. Claude API
+  // 2. MyMemory API — free, no key needed, works from any browser
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: 'Translate the following from ' + from.name + ' to ' + to.name + '. Output ONLY the translated text with no explanations, labels, or extra punctuation:\n\n' + text
-        }]
-      })
-    });
-
+    const langPair = from.mm + '|' + to.mm;
+    const url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=' + encodeURIComponent(langPair);
+    const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
 
-    const out = data.content && data.content[0] && data.content[0].text
-      ? data.content[0].text.trim() : null;
-    if (!out) throw new Error('Empty response');
+    // MyMemory returns status 200 even for errors, check responseStatus
+    if (data.responseStatus !== 200 && data.responseStatus !== '200') {
+      throw new Error('MyMemory error: ' + data.responseStatus);
+    }
+
+    const out = data.responseData && data.responseData.translatedText
+      ? data.responseData.translatedText.trim() : null;
+    if (!out || out === text) throw new Error('No translation returned');
+
+    // MyMemory sometimes returns ALL CAPS for unsupported langs — check
+    if (out === out.toUpperCase() && out.length > 3 && /[A-Z]/.test(out)) {
+      throw new Error('Translation quality too low');
+    }
 
     showResult(side, text, out);
     addHistory(text, out, to.tts);
@@ -788,7 +787,7 @@ async function translate(side, text, isAuto) {
 
   } catch(e) {
     console.error('Translation error:', e.message);
-    setStatus(navigator.onLine ? 'Translation failed — tap to retry' : 'No internet connection', '');
+    setStatus(navigator.onLine ? 'Translation failed — tap to retry' : 'No internet', '');
     clearActive();
     if (isAuto && autoActive) setTimeout(() => { if (!isSpeaking) autoListen(); }, 1500);
   }
