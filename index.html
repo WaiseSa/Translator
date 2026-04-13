@@ -3,698 +3,750 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <title>Translator</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 :root {
-  --bg: #080810; --mid: #0f0f1a; --card: #13131f; --border: #1c1c30;
-  --text: #eeeef8; --muted: #3a3a5a; --muted2: #555570;
-  --green: #00e5a0; --blue: #4d8cff; --orange: #ffaa00; --red: #ff4d6d;
-  --green-bg: rgba(0,229,160,0.07); --blue-bg: rgba(77,140,255,0.07);
-  --font-scale: 1;
+  --bg:#080810; --mid:#0f0f1a; --card:#13131f; --border:#1c1c30;
+  --text:#eeeef8; --muted:#3a3a5a;
+  --green:#00e5a0; --blue:#4d8cff; --orange:#ffaa00; --red:#ff4d6d;
+  --green-bg:rgba(0,229,160,0.08); --blue-bg:rgba(77,140,255,0.08);
+  --fs:1;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
 }
-html, body { height:100%; width:100%; background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; overflow:hidden; }
+html,body { height:100%; width:100%; background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; overflow:hidden; }
 
-/* ─── SCREENS ─── */
-.screen { display:none; flex-direction:column; height:100dvh; width:100%; }
+/* ── SCREENS ── */
+.screen { display:none; flex-direction:column; width:100%; }
 .screen.active { display:flex; }
 
-/* ─── PICKER ─── */
-#pickerScreen { align-items:center; justify-content:flex-start; overflow-y:auto; padding:20px 16px 32px; gap:0; }
-.picker-title { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(–muted); margin:8px 0 18px; }
-.picker-section { width:100%; max-width:380px; margin-bottom:14px; }
-.picker-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(–muted); margin-bottom:8px; padding-left:2px; }
+/* ── PICKER ── */
+#pickerScreen {
+height:100dvh;
+align-items:center;
+overflow-y:auto;
+-webkit-overflow-scrolling:touch;
+padding:calc(16px + var(–safe-top)) 16px calc(16px + var(–safe-bot));
+gap:0;
+}
+.picker-title { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(–muted); margin:4px 0 16px; }
+.section { width:100%; max-width:400px; margin-bottom:14px; }
+.section-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(–muted); margin-bottom:8px; }
 .lang-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .lang-btn {
 background:var(–card); border:2px solid var(–border); border-radius:12px;
-padding:11px 10px; cursor:pointer; transition:all 0.2s;
-display:flex; align-items:center; gap:8px; position:relative;
+padding:11px 10px; cursor:pointer; transition:border-color 0.15s, background 0.15s, box-shadow 0.15s;
+display:flex; align-items:center; gap:8px; position:relative; min-height:56px;
 }
-.lang-btn.selected-top    { border-color:var(–green); background:rgba(0,229,160,0.15); box-shadow:0 0 0 1px var(–green); }
-.lang-btn.selected-bottom { border-color:var(–blue);  background:rgba(77,140,255,0.15); box-shadow:0 0 0 1px var(–blue); }
-.lang-btn.selected-top::after, .lang-btn.selected-bottom::after { content:‘✓’; position:absolute; top:6px; right:8px; font-size:11px; font-weight:800; }
-.lang-btn.selected-top::after    { color:var(–green); }
-.lang-btn.selected-bottom::after { color:var(–blue); }
+.lang-btn.sel-top    { border-color:var(–green); background:rgba(0,229,160,0.14); box-shadow:0 0 0 1px var(–green); }
+.lang-btn.sel-bot    { border-color:var(–blue);  background:rgba(77,140,255,0.14); box-shadow:0 0 0 1px var(–blue); }
+.lang-btn.sel-top::after  { content:‘✓’; position:absolute; top:5px; right:8px; font-size:11px; font-weight:800; color:var(–green); }
+.lang-btn.sel-bot::after  { content:‘✓’; position:absolute; top:5px; right:8px; font-size:11px; font-weight:800; color:var(–blue); }
 .lang-flag { font-size:22px; line-height:1; flex-shrink:0; }
 .lang-name { font-size:12px; font-weight:700; color:var(–text); }
 .lang-sub  { font-size:9px; color:var(–muted); margin-top:1px; }
-.lang-btn.selected-top    .lang-name { color:var(–green); }
-.lang-btn.selected-bottom .lang-name { color:var(–blue); }
-.picker-divider { width:100%; max-width:380px; height:1px; background:var(–border); margin:4px 0 14px; }
+.lang-btn.sel-top .lang-name { color:var(–green); }
+.lang-btn.sel-bot .lang-name { color:var(–blue); }
+.divrow { width:100%; max-width:400px; height:1px; background:var(–border); margin:4px 0 14px; }
 
-.mode-toggle { display:flex; width:100%; max-width:380px; gap:8px; margin-bottom:12px; }
-.mode-opt { flex:1; padding:10px 6px; border-radius:12px; border:1.5px solid var(–border); background:var(–card); cursor:pointer; text-align:center; transition:all 0.2s; }
-.mode-opt.active { border-color:var(–orange); background:rgba(255,170,0,0.1); }
-.mode-opt-icon  { font-size:18px; margin-bottom:3px; }
-.mode-opt-label { font-size:11px; font-weight:700; letter-spacing:1px; color:var(–muted); }
-.mode-opt.active .mode-opt-label { color:var(–orange); }
-.mode-opt-desc  { font-size:9px; color:var(–muted); margin-top:1px; line-height:1.3; }
+/* Mode toggle */
+.mode-row { display:flex; width:100%; max-width:400px; gap:8px; margin-bottom:12px; }
+.mode-opt { flex:1; padding:10px 6px; border-radius:12px; border:1.5px solid var(–border); background:var(–card); cursor:pointer; text-align:center; transition:all 0.15s; }
+.mode-opt.on { border-color:var(–orange); background:rgba(255,170,0,0.1); }
+.mode-icon  { font-size:18px; margin-bottom:3px; }
+.mode-label { font-size:11px; font-weight:700; letter-spacing:1px; color:var(–muted); }
+.mode-opt.on .mode-label { color:var(–orange); }
+.mode-desc  { font-size:9px; color:var(–muted); margin-top:1px; line-height:1.3; }
 
-/* Settings rows */
-.settings-row { display:flex; width:100%; max-width:380px; align-items:center; justify-content:space-between; padding:10px 12px; background:var(–card); border:1px solid var(–border); border-radius:12px; margin-bottom:8px; }
-.settings-row + .settings-row { margin-top:-4px; border-top:1px solid var(–border); border-radius:0; }
-.settings-row:first-of-type { border-radius:12px 12px 0 0; }
-.settings-row:last-of-type  { border-radius:0 0 12px 12px; margin-bottom:12px; }
-.settings-row.solo { border-radius:12px; }
-.sr-left { display:flex; flex-direction:column; gap:2px; }
-.sr-label { font-size:12px; font-weight:700; color:var(–text); }
-.sr-desc  { font-size:10px; color:var(–muted); }
-.toggle-wrap { display:flex; align-items:center; gap:8px; }
-.toggle { width:42px; height:24px; border-radius:999px; background:var(–border); position:relative; cursor:pointer; transition:background 0.2s; flex-shrink:0; }
+/* Settings */
+.srow { display:flex; width:100%; max-width:400px; align-items:center; justify-content:space-between; padding:11px 13px; background:var(–card); border-left:1px solid var(–border); border-right:1px solid var(–border); border-top:1px solid var(–border); }
+.srow:first-child { border-radius:12px 12px 0 0; }
+.srow:last-child  { border-bottom:1px solid var(–border); border-radius:0 0 12px 12px; margin-bottom:12px; }
+.srow-only { border:1px solid var(–border); border-radius:12px; margin-bottom:8px; }
+.sleft { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+.slabel { font-size:12px; font-weight:700; color:var(–text); }
+.sdesc  { font-size:10px; color:var(–muted); }
+.toggle { width:42px; height:24px; border-radius:999px; background:var(–border); position:relative; cursor:pointer; transition:background 0.2s; flex-shrink:0; margin-left:12px; }
 .toggle.on { background:var(–green); }
 .toggle::after { content:’’; position:absolute; width:18px; height:18px; border-radius:50%; background:#fff; top:3px; left:3px; transition:transform 0.2s; }
 .toggle.on::after { transform:translateX(18px); }
-.speed-btns { display:flex; gap:4px; }
-.speed-btn { background:var(–border); border:none; border-radius:6px; color:var(–muted); font-family:‘Syne’,sans-serif; font-size:10px; padding:4px 8px; cursor:pointer; transition:all 0.15s; }
-.speed-btn.active { background:var(–blue); color:#fff; }
-.font-btns { display:flex; gap:4px; }
-.font-btn { background:var(–border); border:none; border-radius:6px; color:var(–muted); font-family:‘Syne’,sans-serif; font-size:10px; padding:4px 10px; cursor:pointer; transition:all 0.15s; }
-.font-btn.active { background:var(–orange); color:#080810; font-weight:700; }
+.btn-grp { display:flex; gap:4px; flex-shrink:0; margin-left:8px; }
+.gbtn { background:var(–border); border:none; border-radius:6px; color:var(–muted); font-family:‘Syne’,sans-serif; font-size:10px; padding:5px 8px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.gbtn.on { background:var(–blue); color:#fff; }
+.gbtn.on-o { background:var(–orange); color:#080810; font-weight:700; }
 
-.start-btn { width:100%; max-width:380px; padding:14px; background:linear-gradient(135deg,var(–green),var(–blue)); border:none; border-radius:14px; cursor:pointer; font-family:‘Syne’,sans-serif; font-size:14px; font-weight:800; color:#080810; letter-spacing:1px; transition:opacity 0.2s,transform 0.15s; margin-bottom:8px; }
-.start-btn:disabled { opacity:0.25; cursor:not-allowed; }
-.start-btn:not(:disabled):active { transform:scale(0.98); }
-.offline-btn { width:100%; max-width:380px; background:none; border:1px solid var(–border); border-radius:12px; padding:10px; font-family:‘Syne’,sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(–muted); cursor:pointer; transition:all 0.2s; margin-bottom:4px; }
-.offline-note { font-size:9px; color:var(–muted); letter-spacing:1px; text-align:center; }
+.start-btn { width:100%; max-width:400px; padding:15px; background:linear-gradient(135deg,var(–green),var(–blue)); border:none; border-radius:14px; cursor:pointer; font-family:‘Syne’,sans-serif; font-size:14px; font-weight:800; color:#080810; letter-spacing:1px; transition:opacity 0.2s,transform 0.15s; margin-bottom:8px; }
+.start-btn:disabled { opacity:0.22; cursor:not-allowed; }
+.start-btn:not(:disabled):active { transform:scale(0.98); opacity:0.9; }
+.dl-btn { width:100%; max-width:400px; background:none; border:1px solid var(–border); border-radius:12px; padding:10px; font-family:‘Syne’,sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(–muted); cursor:pointer; transition:all 0.2s; margin-bottom:4px; }
+.dl-note { font-size:9px; color:var(–muted); letter-spacing:1px; text-align:center; padding-bottom:4px; }
 
-/* ─── TRANSLATE SCREEN ─── */
-#translateScreen { position:relative; }
+/* ── TRANSLATOR SCREEN ── */
+#translateScreen {
+height:100dvh;
+position:relative;
+}
 .half {
 flex:1; display:flex; flex-direction:column;
 align-items:center; justify-content:center;
-gap:10px; padding:14px 16px 10px;
+gap:10px; padding:12px 16px;
 cursor:pointer; user-select:none;
-transition:background 0.3s; background:var(–mid); position:relative; overflow:hidden;
+transition:background 0.25s; background:var(–mid);
+position:relative; overflow:hidden; min-height:0;
 }
-.half.top { transform:rotate(180deg); border-bottom:1px solid var(–border); }
-.half.active-top    { background:var(–green-bg); }
-.half.active-bottom { background:var(–blue-bg); }
+.half.top {
+transform:rotate(180deg);
+border-bottom:1px solid var(–border);
+padding-bottom:calc(12px + var(–safe-top));
+}
+.half.bottom {
+padding-bottom:calc(12px + var(–safe-bot));
+}
+.half.at { background:var(–green-bg); }
+.half.ab { background:var(–blue-bg); }
 
-.divider { height:48px; display:flex; align-items:center; justify-content:center; background:var(–bg); border-top:1px solid var(–border); border-bottom:1px solid var(–border); flex-shrink:0; position:relative; z-index:10; }
-.status-pill { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(–muted); padding:5px 14px; border-radius:999px; border:1px solid var(–border); transition:all 0.25s; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
-.status-pill.lt { color:var(–green); border-color:var(–green); background:var(–green-bg); }
-.status-pill.lb { color:var(–blue);  border-color:var(–blue);  background:var(–blue-bg); }
-.status-pill.tr { color:var(–orange); border-color:var(–orange); }
-.status-pill.sp { color:var(–blue);   border-color:var(–blue); }
-.status-pill.auto { color:var(–orange); border-color:var(–orange); background:rgba(255,170,0,0.07); animation:breathe 2s ease-in-out infinite; }
+/* divider bar */
+.bar {
+height:46px; flex-shrink:0;
+display:flex; align-items:center; justify-content:center;
+background:var(–bg);
+border-top:1px solid var(–border); border-bottom:1px solid var(–border);
+position:relative; z-index:10;
+}
+.pill {
+font-size:10px; letter-spacing:2px; text-transform:uppercase;
+color:var(–muted); padding:5px 13px; border-radius:999px;
+border:1px solid var(–border); transition:all 0.2s;
+white-space:nowrap; max-width:180px; overflow:hidden; text-overflow:ellipsis;
+}
+.pill.lt  { color:var(–green);  border-color:var(–green);  background:var(–green-bg); }
+.pill.lb  { color:var(–blue);   border-color:var(–blue);   background:var(–blue-bg); }
+.pill.tr  { color:var(–orange); border-color:var(–orange); }
+.pill.sp  { color:var(–blue);   border-color:var(–blue); }
+.pill.au  { color:var(–orange); border-color:var(–orange); background:rgba(255,170,0,0.07); animation:breathe 2s ease-in-out infinite; }
 @keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.55} }
 
-.divider-right { position:absolute; right:8px; display:flex; gap:5px; }
-.icon-btn { background:none; border:1px solid var(–border); border-radius:8px; color:var(–muted); font-family:‘Syne’,sans-serif; font-size:9px; letter-spacing:1px; padding:4px 8px; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
-.icon-btn:active { opacity:0.7; }
+.bar-right { position:absolute; right:8px; display:flex; gap:5px; }
+.ibtn { background:none; border:1px solid var(–border); border-radius:8px; color:var(–muted); font-family:‘Syne’,sans-serif; font-size:9px; letter-spacing:1px; padding:5px 8px; cursor:pointer; white-space:nowrap; }
+.ibtn:active { opacity:0.6; }
 
-.person-flag { font-size:42px; line-height:1; transition:transform 0.2s; }
-.half.active-top .person-flag, .half.active-bottom .person-flag { transform:scale(1.1); }
-.person-label { font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(–muted); transition:color 0.2s; }
-.half.active-top    .person-label { color:var(–green); }
-.half.active-bottom .person-label { color:var(–blue); }
+/* person UI */
+.pflag { font-size:40px; line-height:1; transition:transform 0.2s; }
+.half.at .pflag, .half.ab .pflag { transform:scale(1.1); }
+.plabel { font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(–muted); transition:color 0.2s; }
+.half.at .plabel { color:var(–green); }
+.half.ab .plabel { color:var(–blue); }
 
-.bubble { background:var(–card); border:1px solid var(–border); border-radius:14px; padding:10px 13px; width:100%; max-width:340px; min-height:52px; display:flex; flex-direction:column; gap:6px; transition:border-color 0.25s; }
-.half.active-top    .bubble { border-color:var(–green); }
-.half.active-bottom .bubble { border-color:var(–blue); }
-.b-orig { line-height:1.5; color:var(–text); min-height:20px; word-break:break-word; font-size:calc(14px * var(–font-scale)); }
-.b-orig.dim     { color:var(–muted); font-weight:400; font-size:calc(12px * var(–font-scale)); }
-.b-orig.interim { color:rgba(238,238,248,0.35); font-style:italic; }
-.b-div  { height:1px; background:var(–border); display:none; }
-.b-div.show { display:block; }
-.b-trans { font-weight:700; line-height:1.5; word-break:break-word; display:none; font-size:calc(15px * var(–font-scale)); }
-.b-trans.show { display:block; }
-.top-trans    { color:var(–green); }
-.bottom-trans { color:var(–blue); }
-
-.tap-hint { font-size:10px; color:var(–muted); letter-spacing:1px; display:flex; align-items:center; gap:7px; }
-.tap-ring { width:28px; height:28px; border-radius:50%; border:1.5px solid var(–muted); display:flex; align-items:center; justify-content:center; font-size:13px; transition:all 0.25s; flex-shrink:0; }
-.half.active-top .tap-ring    { border-color:var(–green); box-shadow:0 0 10px rgba(0,229,160,0.3); animation:rp 1.2s ease-in-out infinite; }
-.half.active-bottom .tap-ring { border-color:var(–blue);  box-shadow:0 0 10px rgba(77,140,255,0.3); animation:rp 1.2s ease-in-out infinite; }
-@keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
-
-/* Copy btn */
-.copy-flash { position:absolute; bottom:8px; right:8px; background:var(–card); border:1px solid var(–border); border-radius:8px; padding:4px 10px; font-size:10px; color:var(–muted); cursor:pointer; transition:all 0.2s; display:none; }
-.copy-flash.show { display:block; }
-.copy-flash:active { opacity:0.7; }
-
-/* ─── HISTORY PANEL ─── */
-#historyPanel {
-position:fixed; bottom:0; left:0; right:0; z-index:100;
-background:var(–mid); border-top:1px solid var(–border);
-border-radius:20px 20px 0 0;
-transform:translateY(100%); transition:transform 0.3s ease;
-max-height:70dvh; display:flex; flex-direction:column;
+/* bubble */
+.bubble {
+background:var(–card); border:1px solid var(–border);
+border-radius:14px; padding:10px 13px; width:100%; max-width:360px;
+min-height:50px; display:flex; flex-direction:column; gap:6px;
+transition:border-color 0.2s;
 }
-#historyPanel.open { transform:translateY(0); }
-.panel-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; border-bottom:1px solid var(–border); flex-shrink:0; }
-.panel-title { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(–muted); }
-.panel-close { background:none; border:none; color:var(–muted); font-size:18px; cursor:pointer; padding:0 4px; }
-.history-list { overflow-y:auto; padding:10px 14px 20px; display:flex; flex-direction:column; gap:8px; }
-.h-item { background:var(–card); border:1px solid var(–border); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-.h-texts { flex:1; min-width:0; }
-.h-orig  { font-size:11px; color:var(–muted); margin-bottom:3px; }
-.h-trans { font-size:13px; color:var(–text); }
-.h-play  { background:none; border:1px solid var(–border); border-radius:7px; color:var(–muted); cursor:pointer; padding:4px 9px; font-size:12px; flex-shrink:0; transition:all 0.2s; }
-.h-play:active { color:var(–blue); border-color:var(–blue); }
-.h-empty { font-size:12px; color:var(–muted); text-align:center; padding:20px; }
+.half.at .bubble { border-color:var(–green); }
+.half.ab .bubble { border-color:var(–blue); }
+.bo { line-height:1.5; color:var(–text); min-height:20px; word-break:break-word; font-size:calc(14px * var(–fs)); }
+.bo.dim     { color:var(–muted); font-weight:400; font-size:calc(12px * var(–fs)); }
+.bo.interim { color:rgba(238,238,248,0.3); font-style:italic; }
+.bdiv { height:1px; background:var(–border); display:none; }
+.bdiv.show { display:block; }
+.bt { font-weight:700; line-height:1.5; word-break:break-word; display:none; font-size:calc(15px * var(–fs)); }
+.bt.show { display:block; }
+.tc { color:var(–green); }
+.bc { color:var(–blue); }
 
-/* ─── PHRASEBOOK PANEL ─── */
-#phrasePanel {
-position:fixed; bottom:0; left:0; right:0; z-index:100;
-background:var(–mid); border-top:1px solid var(–border);
-border-radius:20px 20px 0 0;
-transform:translateY(100%); transition:transform 0.3s ease;
-max-height:75dvh; display:flex; flex-direction:column;
+/* tap hint */
+.thint { font-size:10px; color:var(–muted); letter-spacing:1px; display:flex; align-items:center; gap:7px; }
+.tring { width:28px; height:28px; border-radius:50%; border:1.5px solid var(–muted); display:flex; align-items:center; justify-content:center; font-size:13px; transition:all 0.2s; flex-shrink:0; }
+.half.at .tring { border-color:var(–green); box-shadow:0 0 10px rgba(0,229,160,0.3); animation:rp 1.2s ease-in-out infinite; }
+.half.ab .tring { border-color:var(–blue);  box-shadow:0 0 10px rgba(77,140,255,0.3); animation:rp 1.2s ease-in-out infinite; }
+@keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+/* copy button — inside rotated half needs counter-rotation */
+.copybtn {
+position:absolute; bottom:8px; right:8px;
+background:var(–card); border:1px solid var(–border);
+border-radius:8px; padding:4px 10px; font-size:10px; color:var(–muted);
+cursor:pointer; display:none; transition:all 0.15s;
 }
-#phrasePanel.open { transform:translateY(0); }
-.phrase-cats { display:flex; gap:6px; padding:10px 14px; overflow-x:auto; flex-shrink:0; border-bottom:1px solid var(–border); }
-.phrase-cat { background:var(–card); border:1px solid var(–border); border-radius:999px; padding:5px 12px; font-size:10px; letter-spacing:1px; color:var(–muted); cursor:pointer; white-space:nowrap; transition:all 0.15s; flex-shrink:0; }
-.phrase-cat.active { background:var(–blue); border-color:var(–blue); color:#fff; }
-.phrase-list { overflow-y:auto; padding:10px 14px 20px; display:flex; flex-direction:column; gap:6px; }
-.phrase-item { background:var(–card); border:1px solid var(–border); border-radius:12px; padding:11px 13px; cursor:pointer; transition:all 0.15s; display:flex; justify-content:space-between; align-items:center; gap:10px; }
-.phrase-item:active { background:rgba(77,140,255,0.1); border-color:var(–blue); }
-.phrase-texts { flex:1; min-width:0; }
-.phrase-en  { font-size:13px; color:var(–text); margin-bottom:3px; }
-.phrase-pt  { font-size:11px; color:var(–muted); }
-.phrase-go  { font-size:16px; flex-shrink:0; }
+.copybtn.show { display:block; }
+.half.top .copybtn { transform:rotate(180deg); bottom:auto; top:8px; right:8px; }
 
-/* overlay */
-.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; display:none; }
+/* ── PANELS ── */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:99; display:none; }
 .overlay.show { display:block; }
+.panel {
+position:fixed; bottom:0; left:0; right:0; z-index:100;
+background:var(–mid); border-top:1px solid var(–border);
+border-radius:20px 20px 0 0;
+transform:translateY(100%); transition:transform 0.3s ease;
+max-height:72dvh; display:flex; flex-direction:column;
+padding-bottom:var(–safe-bot);
+}
+.panel.open { transform:translateY(0); }
+.ph { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; border-bottom:1px solid var(–border); flex-shrink:0; }
+.ph-title { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(–muted); }
+.ph-close { background:none; border:none; color:var(–muted); font-size:18px; cursor:pointer; padding:2px 6px; }
+
+/* history */
+.hlist { overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 14px 16px; display:flex; flex-direction:column; gap:8px; }
+.hitem { background:var(–card); border:1px solid var(–border); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.htexts { flex:1; min-width:0; }
+.horig  { font-size:11px; color:var(–muted); margin-bottom:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.htrans { font-size:13px; color:var(–text); }
+.hplay  { background:none; border:1px solid var(–border); border-radius:7px; color:var(–muted); cursor:pointer; padding:5px 10px; font-size:12px; flex-shrink:0; }
+.hempty { font-size:12px; color:var(–muted); text-align:center; padding:24px; }
+
+/* phrasebook */
+.pcats { display:flex; gap:6px; padding:10px 14px; overflow-x:auto; -webkit-overflow-scrolling:touch; flex-shrink:0; border-bottom:1px solid var(–border); scrollbar-width:none; }
+.pcats::-webkit-scrollbar { display:none; }
+.pcat { background:var(–card); border:1px solid var(–border); border-radius:999px; padding:5px 13px; font-size:10px; letter-spacing:1px; color:var(–muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.15s; }
+.pcat.on { background:var(–blue); border-color:var(–blue); color:#fff; }
+.plist { overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 14px 16px; display:flex; flex-direction:column; gap:6px; }
+.pitem { background:var(–card); border:1px solid var(–border); border-radius:12px; padding:11px 13px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.pitem:active { background:rgba(77,140,255,0.1); border-color:var(–blue); }
+.ptexts { flex:1; min-width:0; }
+.pen  { font-size:13px; color:var(–text); margin-bottom:3px; }
+.ppt  { font-size:11px; color:var(–muted); }
+.pgo  { font-size:15px; flex-shrink:0; color:var(–muted); }
 </style>
 
 </head>
 <body>
 
-<!-- ─── PICKER SCREEN ─── -->
+<!-- ── PICKER ── -->
 
 <div id="pickerScreen" class="screen active">
   <div class="picker-title">🌐 Translator</div>
 
-  <div class="picker-section">
-    <div class="picker-label">Person 1 (top)</div>
+  <div class="section">
+    <div class="section-label">Person 1 — top of screen</div>
     <div class="lang-grid" id="grid1"></div>
   </div>
-  <div class="picker-divider"></div>
-  <div class="picker-section">
-    <div class="picker-label">Person 2 (bottom)</div>
+  <div class="divrow"></div>
+  <div class="section">
+    <div class="section-label">Person 2 — bottom of screen</div>
     <div class="lang-grid" id="grid2"></div>
   </div>
 
-  <div class="picker-label" style="width:100%;max-width:380px;margin-bottom:8px;">Mode</div>
-  <div class="mode-toggle">
-    <div class="mode-opt active" id="modeManual" onclick="setMode('manual')">
-      <div class="mode-opt-icon">👆</div>
-      <div class="mode-opt-label">Manual</div>
-      <div class="mode-opt-desc">Tap flag to speak</div>
+  <div class="section-label" style="width:100%;max-width:400px;margin-bottom:8px;">Listening Mode</div>
+  <div class="mode-row">
+    <div class="mode-opt on" id="modeManual" onclick="setMode('manual')">
+      <div class="mode-icon">👆</div>
+      <div class="mode-label">Manual</div>
+      <div class="mode-desc">Tap your flag to speak</div>
     </div>
     <div class="mode-opt" id="modeAuto" onclick="setMode('auto')">
-      <div class="mode-opt-icon">🎙️</div>
-      <div class="mode-opt-label">Auto</div>
-      <div class="mode-opt-desc">Always listening</div>
+      <div class="mode-icon">🎙️</div>
+      <div class="mode-label">Auto</div>
+      <div class="mode-desc">Always listening</div>
     </div>
   </div>
 
-  <div class="picker-label" style="width:100%;max-width:380px;margin-bottom:8px;">Settings</div>
-
-  <!-- Wake word -->
-
-  <div class="settings-row" style="border-radius:12px 12px 0 0; width:100%; max-width:380px;">
-    <div class="sr-left">
-      <div class="sr-label">Wake Word</div>
-      <div class="sr-desc">Say "translate" to trigger in auto mode</div>
+  <div class="section-label" style="width:100%;max-width:400px;margin-bottom:8px;">Settings</div>
+  <div class="section" style="display:flex;flex-direction:column;gap:0;margin-bottom:12px;">
+    <div class="srow" id="wakeRow">
+      <div class="sleft">
+        <div class="slabel">Wake Word</div>
+        <div class="sdesc">Say "translate" to activate in auto mode</div>
+      </div>
+      <div class="toggle" id="wakeToggle" onclick="toggleSetting('wake')"></div>
     </div>
-    <div class="toggle" id="wakeToggle" onclick="toggleSetting('wake')"></div>
-  </div>
-  <!-- Screen always on -->
-  <div class="settings-row" style="width:100%; max-width:380px;">
-    <div class="sr-left">
-      <div class="sr-label">Screen Always On</div>
-      <div class="sr-desc">Prevent screen sleep during use</div>
+    <div class="srow" id="screenRow">
+      <div class="sleft">
+        <div class="slabel">Screen Always On</div>
+        <div class="sdesc">Prevent sleep during conversations</div>
+      </div>
+      <div class="toggle on" id="screenToggle" onclick="toggleSetting('screen')"></div>
     </div>
-    <div class="toggle on" id="screenToggle" onclick="toggleSetting('screen')"></div>
-  </div>
-  <!-- Speech speed -->
-  <div class="settings-row" style="width:100%; max-width:380px;">
-    <div class="sr-left">
-      <div class="sr-label">Speech Speed</div>
-      <div class="sr-desc">Translation voice speed</div>
+    <div class="srow" id="speedRow">
+      <div class="sleft">
+        <div class="slabel">Speech Speed</div>
+        <div class="sdesc">Voice playback rate</div>
+      </div>
+      <div class="btn-grp">
+        <button class="gbtn" id="spSlow"   onclick="setSpeed(0.75,'spSlow')">Slow</button>
+        <button class="gbtn on" id="spNorm" onclick="setSpeed(0.93,'spNorm')">Normal</button>
+        <button class="gbtn" id="spFast"   onclick="setSpeed(1.2,'spFast')">Fast</button>
+      </div>
     </div>
-    <div class="speed-btns">
-      <button class="speed-btn" onclick="setSpeed(0.75)">Slow</button>
-      <button class="speed-btn active" onclick="setSpeed(0.93)">Normal</button>
-      <button class="speed-btn" onclick="setSpeed(1.2)">Fast</button>
-    </div>
-  </div>
-  <!-- Font size -->
-  <div class="settings-row" style="border-radius:0 0 12px 12px; width:100%; max-width:380px; margin-bottom:12px;">
-    <div class="sr-left">
-      <div class="sr-label">Text Size</div>
-      <div class="sr-desc">Larger text across the table</div>
-    </div>
-    <div class="font-btns">
-      <button class="font-btn" onclick="setFont(0.85)">A</button>
-      <button class="font-btn active" onclick="setFont(1)">A</button>
-      <button class="font-btn" style="font-size:13px" onclick="setFont(1.25)">A</button>
+    <div class="srow" id="fontRow" style="border-bottom:1px solid var(--border);border-radius:0 0 12px 12px;">
+      <div class="sleft">
+        <div class="slabel">Text Size</div>
+        <div class="sdesc">For reading across a table</div>
+      </div>
+      <div class="btn-grp">
+        <button class="gbtn"    id="fsS" onclick="setFont(0.85,'fsS')" style="font-size:9px">A</button>
+        <button class="gbtn on-o" id="fsM" onclick="setFont(1,'fsM')"  style="font-size:11px">A</button>
+        <button class="gbtn"    id="fsL" onclick="setFont(1.25,'fsL')" style="font-size:13px">A</button>
+      </div>
     </div>
   </div>
 
 <button class="start-btn" id="startBtn" disabled onclick="startTranslating()">Start Translating →</button>
-<button id="offlineBtn" class="offline-btn" onclick="loadOfflineModel()">⬇ Download Offline Model (PT↔EN)</button>
+<button class="dl-btn" id="dlBtn" onclick="loadOfflineModel()">⬇ Download Offline Model (PT ↔ EN)</button>
 
-  <div class="offline-note">~150MB · one-time · works without internet after</div>
+  <div class="dl-note">~150 MB · downloaded once · works without internet after</div>
 </div>
 
-<!-- ─── TRANSLATE SCREEN ─── -->
+<!-- ── TRANSLATOR ── -->
 
 <div id="translateScreen" class="screen">
+
   <div class="half top" id="halfTop">
-    <div class="person-flag" id="topFlag"></div>
-    <div class="person-label" id="topLabel"></div>
+    <div class="pflag" id="tFlag"></div>
+    <div class="plabel" id="tLabel"></div>
     <div class="bubble">
-      <div class="b-orig dim" id="topOrig"></div>
-      <div class="b-div" id="topDiv"></div>
-      <div class="b-trans top-trans" id="topTrans"></div>
+      <div class="bo dim" id="tOrig"></div>
+      <div class="bdiv" id="tDiv"></div>
+      <div class="bt tc" id="tTrans"></div>
     </div>
-    <div class="tap-hint"><div class="tap-ring" id="topRing">🎙️</div><span id="topHint"></span></div>
-    <div class="copy-flash" id="topCopy" onclick="copyText('top')">⧉ Copy</div>
+    <div class="thint"><div class="tring" id="tRing">🎙️</div><span id="tHint"></span></div>
+    <div class="copybtn" id="tCopy" onclick="doCopy('top')">⧉ Copy</div>
   </div>
 
-  <div class="divider">
-    <div class="status-pill" id="statusPill">Tap a flag to start</div>
-    <div class="divider-right">
-      <button class="icon-btn" onclick="toggleHistory()">📋 History</button>
-      <button class="icon-btn" onclick="togglePhrases()">⚡ Phrases</button>
-      <button class="icon-btn" onclick="goBack()">⇠</button>
+  <div class="bar">
+    <div class="pill" id="statusPill">Tap a flag to start</div>
+    <div class="bar-right">
+      <button class="ibtn" onclick="openHistory()">📋</button>
+      <button class="ibtn" onclick="openPhrases()">⚡ Phrases</button>
+      <button class="ibtn" onclick="goBack()">⇠ Back</button>
     </div>
   </div>
 
   <div class="half bottom" id="halfBot">
-    <div class="person-flag" id="botFlag"></div>
-    <div class="person-label" id="botLabel"></div>
+    <div class="pflag" id="bFlag"></div>
+    <div class="plabel" id="bLabel"></div>
     <div class="bubble">
-      <div class="b-orig dim" id="botOrig"></div>
-      <div class="b-div" id="botDiv"></div>
-      <div class="b-trans bottom-trans" id="botTrans"></div>
+      <div class="bo dim" id="bOrig"></div>
+      <div class="bdiv" id="bDiv"></div>
+      <div class="bt bc" id="bTrans"></div>
     </div>
-    <div class="tap-hint"><div class="tap-ring" id="botRing">🎙️</div><span id="botHint"></span></div>
-    <div class="copy-flash" id="botCopy" onclick="copyText('bot')">⧉ Copy</div>
+    <div class="thint"><div class="tring" id="bRing">🎙️</div><span id="bHint"></span></div>
+    <div class="copybtn" id="bCopy" onclick="doCopy('bot')">⧉ Copy</div>
   </div>
+
 </div>
 
-<!-- ─── HISTORY PANEL ─── -->
+<!-- ── HISTORY PANEL ── -->
 
 <div class="overlay" id="overlay" onclick="closePanels()"></div>
-<div id="historyPanel">
-  <div class="panel-header">
-    <span class="panel-title">Conversation History</span>
-    <button class="panel-close" onclick="closePanels()">✕</button>
+<div class="panel" id="histPanel">
+  <div class="ph">
+    <span class="ph-title">History</span>
+    <button class="ph-close" onclick="closePanels()">✕</button>
   </div>
-  <div class="history-list" id="historyList"><div class="h-empty">No translations yet</div></div>
+  <div class="hlist" id="hList"><div class="hempty">No translations yet</div></div>
 </div>
 
-<!-- ─── PHRASEBOOK PANEL ─── -->
+<!-- ── PHRASES PANEL ── -->
 
-<div id="phrasePanel">
-  <div class="panel-header">
-    <span class="panel-title">Quick Phrases</span>
-    <button class="panel-close" onclick="closePanels()">✕</button>
+<div class="panel" id="phrasePanel">
+  <div class="ph">
+    <span class="ph-title">Quick Phrases</span>
+    <button class="ph-close" onclick="closePanels()">✕</button>
   </div>
-  <div class="phrase-cats" id="phraseCats"></div>
-  <div class="phrase-list" id="phraseList"></div>
+  <div class="pcats" id="pCats"></div>
+  <div class="plist" id="pList"></div>
 </div>
 
 <script>
-// ─── LANGUAGES ────────────────────────────────────────────────────
+// ── LANGUAGES ──────────────────────────────────────────────────────────
+// Note: iOS Safari SR support: en-US ✓, pt-BR ✓, fr-CA ✓, fa-IR ✓ (not fa-AF), es-US/es-MX ✓ (not es-DO)
 const LANGS = [
-  { id:'en', flag:'🇺🇸', name:'English',   sub:'United States',    srLang:'en-US', ttsLang:'en-US', tapHint:'tap to speak',        listenHint:'listening...' },
-  { id:'pt', flag:'🇧🇷', name:'Português', sub:'Brasil',           srLang:'pt-BR', ttsLang:'pt-BR', tapHint:'toque para falar',    listenHint:'ouvindo...' },
-  { id:'fa', flag:'🇦🇫', name:'دری',       sub:'Afghanistan',      srLang:'fa-AF', ttsLang:'fa-IR', tapHint:'لمس کنید',           listenHint:'گوش میدهم...' },
-  { id:'fr', flag:'🇨🇦', name:'Français',  sub:'Canada',           srLang:'fr-CA', ttsLang:'fr-CA', tapHint:'toucher pour parler', listenHint:'écoute...' },
-  { id:'es', flag:'🇩🇴', name:'Español',   sub:'Rep. Dominicana',  srLang:'es-DO', ttsLang:'es-DO', tapHint:'toca para hablar',    listenHint:'escuchando...' },
+  { id:'en', flag:'🇺🇸', name:'English',    sub:'United States',      sr:'en-US', tts:'en-US', tapHint:'tap to speak',        activeHint:'listening...',    stopHint:'tap to stop' },
+  { id:'pt', flag:'🇧🇷', name:'Português',  sub:'Brasil',             sr:'pt-BR', tts:'pt-BR', tapHint:'toque para falar',    activeHint:'ouvindo...',      stopHint:'toque para parar' },
+  { id:'fa', flag:'🇦🇫', name:'دری / فارسی',sub:'Afghanistan',        sr:'fa-IR', tts:'fa-IR', tapHint:'برای صحبت لمس کنید', activeHint:'در حال گوش دادن', stopHint:'لمس کنید تا متوقف شود' },
+  { id:'fr', flag:'🇨🇦', name:'Français',   sub:'Canada',             sr:'fr-CA', tts:'fr-CA', tapHint:'toucher pour parler', activeHint:'écoute...',       stopHint:'toucher pour arrêter' },
+  { id:'es', flag:'🇩🇴', name:'Español',    sub:'Rep. Dominicana',    sr:'es-US', tts:'es-US', tapHint:'toca para hablar',    activeHint:'escuchando...',   stopHint:'toca para parar' },
 ];
 
-// ─── PHRASEBOOK ───────────────────────────────────────────────────
+// ── PHRASEBOOK ─────────────────────────────────────────────────────────
 const PHRASES = {
   'Greetings': [
-    { en:'Hello, how are you?',          pt:'Olá, como vai você?' },
-    { en:'Good morning',                  pt:'Bom dia' },
-    { en:'Good afternoon',                pt:'Boa tarde' },
-    { en:'Good evening',                  pt:'Boa noite' },
-    { en:'Nice to meet you',              pt:'Prazer em conhecê-lo' },
-    { en:'How can I help you?',           pt:'Como posso ajudá-lo?' },
+    {en:'Hello, how are you?',         pt:'Olá, como vai você?'},
+    {en:'Good morning',                pt:'Bom dia'},
+    {en:'Good afternoon',              pt:'Boa tarde'},
+    {en:'Good evening',                pt:'Boa noite'},
+    {en:'Nice to meet you',            pt:'Prazer em conhecê-lo'},
+    {en:'How can I help you?',         pt:'Como posso ajudá-lo?'},
+    {en:'Thank you',                   pt:'Obrigado'},
+    {en:'You\'re welcome',             pt:'De nada'},
   ],
   'Work': [
-    { en:'Please do this carefully',      pt:'Por favor, faça isso com cuidado' },
-    { en:'Stop work',                     pt:'Pare o trabalho' },
-    { en:'Start here',                    pt:'Comece aqui' },
-    { en:'Good job',                      pt:'Bom trabalho' },
-    { en:'Be careful',                    pt:'Tome cuidado' },
-    { en:'How many?',                     pt:'Quantos?' },
-    { en:'How much does it cost?',        pt:'Quanto custa?' },
-    { en:'When will it be ready?',        pt:'Quando vai estar pronto?' },
+    {en:'Please do this carefully',    pt:'Por favor, faça isso com cuidado'},
+    {en:'Stop work',                   pt:'Pare o trabalho'},
+    {en:'Start here',                  pt:'Comece aqui'},
+    {en:'Good job',                    pt:'Bom trabalho'},
+    {en:'Be careful',                  pt:'Tome cuidado'},
+    {en:'How many?',                   pt:'Quantos?'},
+    {en:'How much does it cost?',      pt:'Quanto custa?'},
+    {en:'When will it be ready?',      pt:'Quando vai estar pronto?'},
+    {en:'Come here please',            pt:'Venha cá por favor'},
   ],
   'Directions': [
-    { en:'Turn left',                     pt:'Vire à esquerda' },
-    { en:'Turn right',                    pt:'Vire à direita' },
-    { en:'Go straight',                   pt:'Siga em frente' },
-    { en:'Stop here',                     pt:'Pare aqui' },
-    { en:'Where is the bathroom?',        pt:'Onde é o banheiro?' },
-    { en:'Follow me',                     pt:'Me siga' },
+    {en:'Turn left',                   pt:'Vire à esquerda'},
+    {en:'Turn right',                  pt:'Vire à direita'},
+    {en:'Go straight',                 pt:'Siga em frente'},
+    {en:'Stop here',                   pt:'Pare aqui'},
+    {en:'Where is the bathroom?',      pt:'Onde é o banheiro?'},
+    {en:'Follow me',                   pt:'Me siga'},
+    {en:'Wait here',                   pt:'Espere aqui'},
   ],
   'Logistics': [
-    { en:'Sign here please',              pt:'Assine aqui por favor' },
-    { en:'This shipment is ready',        pt:'Esta remessa está pronta' },
-    { en:'How many pallets?',             pt:'Quantos paletes?' },
-    { en:'This is damaged',               pt:'Isso está danificado' },
-    { en:'Please wait',                   pt:'Por favor, aguarde' },
-    { en:'The delivery is late',          pt:'A entrega está atrasada' },
-    { en:'Where should I put this?',      pt:'Onde devo colocar isso?' },
+    {en:'Sign here please',            pt:'Assine aqui por favor'},
+    {en:'This shipment is ready',      pt:'Esta remessa está pronta'},
+    {en:'How many pallets?',           pt:'Quantos paletes?'},
+    {en:'This is damaged',             pt:'Isso está danificado'},
+    {en:'Please wait',                 pt:'Por favor, aguarde'},
+    {en:'The delivery is late',        pt:'A entrega está atrasada'},
+    {en:'Where should I put this?',    pt:'Onde devo colocar isso?'},
+    {en:'Load this truck',             pt:'Carregue este caminhão'},
   ],
   'Emergency': [
-    { en:'Call an ambulance',             pt:'Chame uma ambulância' },
-    { en:'Are you okay?',                 pt:'Você está bem?' },
-    { en:'I need help',                   pt:'Preciso de ajuda' },
-    { en:'Call the police',               pt:'Chame a polícia' },
-    { en:'Is anyone hurt?',               pt:'Alguém está machucado?' },
+    {en:'Call an ambulance',           pt:'Chame uma ambulância'},
+    {en:'Are you okay?',               pt:'Você está bem?'},
+    {en:'I need help',                 pt:'Preciso de ajuda'},
+    {en:'Call the police',             pt:'Chame a polícia'},
+    {en:'Is anyone hurt?',             pt:'Alguém está machucado?'},
+    {en:'Go to the hospital',          pt:'Vá para o hospital'},
   ],
 };
 
-// ─── PT DETECTION ─────────────────────────────────────────────────
-const PT_PAT  = /\b(eu|você|voce|ele|ela|nós|nos|eles|mas|não|nao|com|para|uma|isso|esse|esta|como|mais|por|muito|quando|então|entao|que|em|de|do|da|no|na|ao|um|os|as|seu|sua|meu|minha|tem|são|sao|está|esta|foi|ser|ter|fazer|quero|preciso|obrigado|obrigada|sim|bom|boa|tudo|bem|olá|ola|oi|tchau|falar|aqui|hoje|amanhã|amanha|sempre|nunca|também|tambem|já|ja|agora|depois|porque|legal|cara|gente|tá|ta|né|ne)\b/i;
+// ── PT DETECTION ───────────────────────────────────────────────────────
+const PT_PAT  = /\b(eu|você|voce|ele|ela|nós|nos|eles|mas|não|nao|com|para|uma|isso|esse|esta|como|mais|por|muito|quando|então|entao|que|em|de|do|da|no|na|ao|um|os|as|seu|sua|meu|minha|tem|são|sao|está|foi|ser|ter|fazer|quero|preciso|obrigado|obrigada|sim|bom|boa|tudo|bem|olá|ola|oi|tchau|falar|aqui|hoje|amanhã|amanha|sempre|nunca|também|tambem|já|ja|agora|depois|porque|legal|cara|gente|tá|ta|né|ne|pois|então|esse|essa|esses|essas)\b/i;
 const PT_CHAR = /[ãõâêîôûàáéíóúç]/i;
+
 function detectSide(text) {
   const score = (PT_PAT.test(text) ? 2 : 0) + (PT_CHAR.test(text) ? 3 : 0);
   const isPT = score >= 2;
   if (topLang.id === 'pt') return isPT ? 'top' : 'bot';
   if (botLang.id === 'pt') return isPT ? 'bot' : 'top';
+  // Neither side is PT — default to bot
   return 'bot';
 }
 
-// ─── STATE ────────────────────────────────────────────────────────
-let sel1=null, sel2=null, appMode='manual';
-let topLang=null, botLang=null;
-let activeSide=null, isListening=false, isSpeaking=false;
-let recognition=null, isOnline=navigator.onLine;
-let autoLoopActive=false;
-
-// Better connectivity check — actually pings the API
-async function checkOnline() {
-  try {
-    const r = await fetch('https://api.anthropic.com/v1/models', { method:'HEAD', cache:'no-store' });
-    isOnline = true;
-  } catch(e) { isOnline = false; }
-}
-let historyLog=[], lastTranslation={};
-let settings = { wake:false, screen:true, speed:0.93, font:1 };
-let activePhrasesCat=null;
-let wakeLock=null;
+// ── STATE ──────────────────────────────────────────────────────────────
+let sel1 = null, sel2 = null, appMode = 'manual';
+let topLang = null, botLang = null;
+let activeSide = null, isListening = false, isSpeaking = false;
+let recognition = null, autoActive = false, wokUp = false;
+let historyLog = [], lastCopy = {};
+let cfg = { wake: false, screen: true, speed: 0.93 };
+let activeCat = null, wakeLock = null;
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-window.addEventListener('online',  ()=>isOnline=true);
-window.addEventListener('offline', ()=>isOnline=false);
-
-// ─── PICKER ───────────────────────────────────────────────────────
-function buildGrids() {
-  ['grid1','grid2'].forEach((gid,gi)=>{
-    document.getElementById(gid).innerHTML = LANGS.map(l=>`
-      <div class="lang-btn" id="${gid}-${l.id}" onclick="selectLang(${gi+1},'${l.id}')">
+// ── PICKER ─────────────────────────────────────────────────────────────
+function buildUI() {
+  // Language grids
+  ['grid1','grid2'].forEach((gid, gi) => {
+    document.getElementById(gid).innerHTML = LANGS.map(l => `
+      <div class="lang-btn" id="${gid}-${l.id}" onclick="pick(${gi+1},'${l.id}')">
         <div class="lang-flag">${l.flag}</div>
         <div><div class="lang-name">${l.name}</div><div class="lang-sub">${l.sub}</div></div>
       </div>`).join('');
   });
-  // build phrase cats
-  activePhrasesCat = Object.keys(PHRASES)[0];
-  document.getElementById('phraseCats').innerHTML = Object.keys(PHRASES).map(c=>`
-    <div class="phrase-cat${c===activePhrasesCat?' active':''}" onclick="setPhrasesCat('${c}')">${c}</div>`).join('');
+  // Phrase categories
+  activeCat = Object.keys(PHRASES)[0];
+  document.getElementById('pCats').innerHTML = Object.keys(PHRASES).map(c =>
+    `<div class="pcat${c===activeCat?' on':''}" onclick="setCat('${c}')">${c}</div>`
+  ).join('');
   renderPhrases();
 }
 
-function selectLang(person, id) {
-  if (person===1 && sel2===id) return;
-  if (person===2 && sel1===id) return;
-  if (person===1) sel1=id; else sel2=id;
-  LANGS.forEach(l=>{
-    document.getElementById('grid1-'+l.id).className='lang-btn'+(sel1===l.id?' selected-top':'');
-    document.getElementById('grid2-'+l.id).className='lang-btn'+(sel2===l.id?' selected-bottom':'');
+function pick(person, id) {
+  // Prevent picking same language for both sides
+  if (person === 1 && sel2 === id) return;
+  if (person === 2 && sel1 === id) return;
+  if (person === 1) sel1 = id; else sel2 = id;
+  LANGS.forEach(l => {
+    document.getElementById('grid1-'+l.id).className = 'lang-btn' + (sel1===l.id ? ' sel-top' : '');
+    document.getElementById('grid2-'+l.id).className = 'lang-btn' + (sel2===l.id ? ' sel-bot' : '');
   });
-  document.getElementById('startBtn').disabled=!(sel1&&sel2);
+  document.getElementById('startBtn').disabled = !(sel1 && sel2);
 }
 
 function setMode(m) {
-  appMode=m;
-  document.getElementById('modeManual').classList.toggle('active',m==='manual');
-  document.getElementById('modeAuto').classList.toggle('active',m==='auto');
+  appMode = m;
+  document.getElementById('modeManual').classList.toggle('on', m === 'manual');
+  document.getElementById('modeAuto').classList.toggle('on', m === 'auto');
 }
 
-function toggleSetting(key) {
-  if (key==='wake')   { settings.wake=!settings.wake;   document.getElementById('wakeToggle').classList.toggle('on',settings.wake); }
-  if (key==='screen') { settings.screen=!settings.screen; document.getElementById('screenToggle').classList.toggle('on',settings.screen); manageWakeLock(); }
+function toggleSetting(k) {
+  if (k === 'wake')   { cfg.wake   = !cfg.wake;   document.getElementById('wakeToggle').classList.toggle('on', cfg.wake); }
+  if (k === 'screen') { cfg.screen = !cfg.screen; document.getElementById('screenToggle').classList.toggle('on', cfg.screen); handleWakeLock(); }
 }
 
-function setSpeed(v) {
-  settings.speed=v;
-  document.querySelectorAll('.speed-btn').forEach((b,i)=>{ b.classList.toggle('active',[0.75,0.93,1.2][i]===v); });
+function setSpeed(v, btnId) {
+  cfg.speed = v;
+  ['spSlow','spNorm','spFast'].forEach(id => document.getElementById(id).className = 'gbtn' + (id===btnId?' on':''));
 }
 
-function setFont(v) {
-  settings.font=v;
-  document.querySelectorAll('.font-btn').forEach((b,i)=>{ b.classList.toggle('active',[0.85,1,1.25][i]===v); });
-  document.documentElement.style.setProperty('--font-scale', v);
+function setFont(v, btnId) {
+  document.documentElement.style.setProperty('--fs', v);
+  ['fsS','fsM','fsL'].forEach(id => document.getElementById(id).className = 'gbtn' + (id===btnId?' on-o':''));
 }
 
-async function manageWakeLock() {
+async function handleWakeLock() {
   try {
-    if (settings.screen && 'wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-    } else if (wakeLock) {
-      await wakeLock.release(); wakeLock=null;
+    if (cfg.screen && 'wakeLock' in navigator) {
+      if (!wakeLock || wakeLock.released) wakeLock = await navigator.wakeLock.request('screen');
+    } else if (wakeLock && !wakeLock.released) {
+      await wakeLock.release();
     }
-  } catch(e) {}
+  } catch(e) { /* WakeLock not available on this device */ }
 }
 
-// ─── START ────────────────────────────────────────────────────────
+// ── START / STOP ───────────────────────────────────────────────────────
 function startTranslating() {
-  topLang=LANGS.find(l=>l.id===sel1);
-  botLang=LANGS.find(l=>l.id===sel2);
-  document.getElementById('topFlag').textContent  = topLang.flag;
-  document.getElementById('topLabel').textContent = topLang.name;
-  document.getElementById('botFlag').textContent  = botLang.flag;
-  document.getElementById('botLabel').textContent = botLang.name;
+  topLang = LANGS.find(l => l.id === sel1);
+  botLang = LANGS.find(l => l.id === sel2);
 
-  const isAuto = appMode==='auto';
-  document.getElementById('topOrig').textContent = isAuto ? '...' : topLang.tapHint;
-  document.getElementById('botOrig').textContent = isAuto ? '...' : botLang.tapHint;
-  document.getElementById('topHint').textContent = isAuto ? '' : topLang.tapHint;
-  document.getElementById('botHint').textContent = isAuto ? '' : botLang.tapHint;
-  document.getElementById('topOrig').className = 'b-orig dim';
-  document.getElementById('botOrig').className = 'b-orig dim';
+  el('tFlag').textContent  = topLang.flag;
+  el('tLabel').textContent = topLang.name;
+  el('bFlag').textContent  = botLang.flag;
+  el('bLabel').textContent = botLang.name;
 
-  if (appMode==='manual') {
-    document.getElementById('halfTop').onclick = ()=>handleTap('top');
-    document.getElementById('halfBot').onclick = ()=>handleTap('bot');
-    setStatus('Tap a flag to start','');
+  resetBubble('top');
+  resetBubble('bot');
+
+  if (appMode === 'manual') {
+    el('halfTop').onclick = () => tap('top');
+    el('halfBot').onclick = () => tap('bot');
+    setStatus('Tap a flag to speak', '');
   } else {
-    document.getElementById('halfTop').onclick = null;
-    document.getElementById('halfBot').onclick = null;
-    setStatus(settings.wake ? 'Say "translate" to begin' : 'Listening...', 'auto');
-    autoLoopActive=true;
-    if (!settings.wake) autoListen();
+    el('halfTop').onclick = null;
+    el('halfBot').onclick = null;
+    autoActive = true;
+    if (cfg.wake) {
+      setStatus('Say "translate" to begin', 'au');
+      listenForWake();
+    } else {
+      setStatus('Listening...', 'au');
+      autoListen();
+    }
   }
 
   show('translateScreen');
-  manageWakeLock();
-  // Haptic on start
-  vibrate(30);
+  handleWakeLock();
+  buzz(30);
 }
 
 function goBack() {
-  autoLoopActive=false;
-  if (isListening) stopListening();
+  autoActive = false;
+  stopListening();
   window.speechSynthesis.cancel();
-  if (wakeLock) { wakeLock.release(); wakeLock=null; }
+  isSpeaking = false;
+  if (wakeLock && !wakeLock.released) wakeLock.release().catch(()=>{});
   clearActive();
   show('pickerScreen');
 }
 
+// ── HELPERS ────────────────────────────────────────────────────────────
+const el = id => document.getElementById(id);
+
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  el(id).classList.add('active');
 }
 
-// ─── UI ───────────────────────────────────────────────────────────
-function setStatus(text,cls) {
-  const p=document.getElementById('statusPill');
-  p.textContent=text; p.className='status-pill '+(cls||'');
+function setStatus(txt, cls) {
+  const p = el('statusPill');
+  p.textContent = txt; p.className = 'pill ' + (cls || '');
 }
 
 function setActive(side) {
-  activeSide=side;
-  document.getElementById('halfTop').classList.remove('active-top','active-bottom');
-  document.getElementById('halfBot').classList.remove('active-top','active-bottom');
-  if (side==='top') document.getElementById('halfTop').classList.add('active-top');
-  if (side==='bot') document.getElementById('halfBot').classList.add('active-bottom');
-  document.getElementById('topRing').textContent = side==='top'?'🔴':'🎙️';
-  document.getElementById('botRing').textContent = side==='bot'?'🔴':'🎙️';
-  document.getElementById('topHint').textContent = side==='top' ? topLang.listenHint : (appMode==='auto'?'':topLang.tapHint);
-  document.getElementById('botHint').textContent = side==='bot' ? botLang.listenHint : (appMode==='auto'?'':botLang.tapHint);
+  activeSide = side;
+  el('halfTop').classList.toggle('at', side === 'top');
+  el('halfTop').classList.remove('ab');
+  el('halfBot').classList.toggle('ab', side === 'bot');
+  el('halfBot').classList.remove('at');
+  el('tRing').textContent = side === 'top' ? '🔴' : '🎙️';
+  el('bRing').textContent = side === 'bot' ? '🔴' : '🎙️';
+  const tl = side === 'top' ? topLang : botLang;
+  const bl = side === 'bot' ? botLang : topLang;
+  el('tHint').textContent = side === 'top' ? topLang.activeHint : (appMode==='auto' ? '' : topLang.tapHint);
+  el('bHint').textContent = side === 'bot' ? botLang.activeHint : (appMode==='auto' ? '' : botLang.tapHint);
 }
 
 function clearActive() {
-  activeSide=null;
-  document.getElementById('halfTop').classList.remove('active-top','active-bottom');
-  document.getElementById('halfBot').classList.remove('active-top','active-bottom');
-  document.getElementById('topRing').textContent='🎙️';
-  document.getElementById('botRing').textContent='🎙️';
-  if (topLang) document.getElementById('topHint').textContent=appMode==='auto'?'':topLang.tapHint;
-  if (botLang) document.getElementById('botHint').textContent=appMode==='auto'?'':botLang.tapHint;
+  activeSide = null;
+  el('halfTop').classList.remove('at','ab');
+  el('halfBot').classList.remove('at','ab');
+  el('tRing').textContent = '🎙️';
+  el('bRing').textContent = '🎙️';
+  if (topLang) el('tHint').textContent = appMode==='auto' ? '' : topLang.tapHint;
+  if (botLang) el('bHint').textContent = appMode==='auto' ? '' : botLang.tapHint;
 }
 
 function resetBubble(side) {
-  const o=document.getElementById(side==='top'?'topOrig':'botOrig');
-  const d=document.getElementById(side==='top'?'topDiv':'botDiv');
-  const t=document.getElementById(side==='top'?'topTrans':'botTrans');
-  o.textContent='...'; o.className='b-orig interim';
-  d.className='b-div'; t.className='b-trans '+(side==='top'?'top-trans':'bottom-trans');
-  document.getElementById(side==='top'?'topCopy':'botCopy').classList.remove('show');
+  const isTop = side === 'top';
+  const lang = isTop ? topLang : botLang;
+  el(isTop?'tOrig':'bOrig').textContent = appMode==='auto' ? '...' : (lang ? lang.tapHint : '...');
+  el(isTop?'tOrig':'bOrig').className = 'bo dim';
+  el(isTop?'tDiv':'bDiv').className = 'bdiv';
+  el(isTop?'tTrans':'bTrans').className = 'bt ' + (isTop?'tc':'bc');
+  el(isTop?'tCopy':'bCopy').classList.remove('show');
 }
 
-function showInterim(side,text) {
-  const o=document.getElementById(side==='top'?'topOrig':'botOrig');
-  o.textContent=text; o.className='b-orig interim';
+function showInterim(side, text) {
+  el(side==='top'?'tOrig':'bOrig').textContent = text;
+  el(side==='top'?'tOrig':'bOrig').className = 'bo interim';
 }
 
-function showResult(side,original,translation) {
-  const o=document.getElementById(side==='top'?'topOrig':'botOrig');
-  const d=document.getElementById(side==='top'?'topDiv':'botDiv');
-  const t=document.getElementById(side==='top'?'topTrans':'botTrans');
-  o.textContent=original; o.className='b-orig';
-  d.className='b-div show';
-  t.textContent=translation; t.className='b-trans show '+(side==='top'?'top-trans':'bottom-trans');
-  document.getElementById(side==='top'?'topCopy':'botCopy').classList.add('show');
-  lastTranslation[side]={text:translation, lang: side==='top'?botLang.ttsLang:topLang.ttsLang};
-  vibrate(20);
+function showResult(side, original, translation) {
+  const isTop = side === 'top';
+  el(isTop?'tOrig':'bOrig').textContent = original;
+  el(isTop?'tOrig':'bOrig').className = 'bo';
+  el(isTop?'tDiv':'bDiv').className = 'bdiv show';
+  el(isTop?'tTrans':'bTrans').textContent = translation;
+  el(isTop?'tTrans':'bTrans').className = 'bt show ' + (isTop?'tc':'bc');
+  el(isTop?'tCopy':'bCopy').classList.add('show');
+  lastCopy[side] = translation;
+  buzz(18);
 }
 
-function copyText(side) {
-  const t=lastTranslation[side];
-  if (t) navigator.clipboard.writeText(t.text).catch(()=>{});
-  const btn=document.getElementById(side==='top'?'topCopy':'botCopy');
-  btn.textContent='✓ Copied'; setTimeout(()=>btn.textContent='⧉ Copy',1800);
+function doCopy(side) {
+  const t = lastCopy[side];
+  if (!t) return;
+  navigator.clipboard.writeText(t).catch(() => {});
+  const btn = el(side==='top'?'tCopy':'bCopy');
+  btn.textContent = '✓ Copied';
+  setTimeout(() => btn.textContent = '⧉ Copy', 1800);
 }
 
-function vibrate(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch(e){} }
+function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch(e) {} }
 
-// ─── MANUAL TAP ───────────────────────────────────────────────────
-function handleTap(side) {
-  if (isSpeaking) { window.speechSynthesis.cancel(); isSpeaking=false; }
-  if (isListening && activeSide===side) { stopListening(); return; }
+// ── MANUAL TAP ─────────────────────────────────────────────────────────
+function tap(side) {
+  if (isSpeaking) { window.speechSynthesis.cancel(); isSpeaking = false; setStatus('Tap a flag to speak',''); return; }
+  if (isListening && activeSide === side) { stopListening(); return; }
   if (isListening) stopListening();
-  startListening(side, false);
+  startListening(side, false, false);
 }
 
-// ─── RECOGNITION ─────────────────────────────────────────────────
-function startListening(side, isAuto) {
-  if (!SR) { setStatus('Not supported',''); return; }
-  const listenLang = isAuto ? 'pt-BR' : (side==='top'?topLang.srLang:botLang.srLang);
+// ── SPEECH RECOGNITION ─────────────────────────────────────────────────
+// mode: 'manual' | 'auto' | 'wake'
+function startListening(side, isAuto, isWakeMode) {
+  if (!SR) { setStatus('Mic not supported', ''); return; }
+  if (isListening) return;
+
+  const lang = isWakeMode ? 'en-US' : (isAuto ? 'pt-BR' : (side==='top' ? topLang.sr : botLang.sr));
+
   recognition = new SR();
-  recognition.continuous = false;
+  recognition.continuous     = false;
   recognition.interimResults = true;
-  recognition.lang = listenLang;
+  recognition.lang           = lang;
   recognition.maxAlternatives = 1;
-  recognition._final = '';
+  recognition._final         = '';
+  recognition._isAuto        = isAuto;
+  recognition._isWake        = isWakeMode;
+  recognition._side          = side;
 
-  recognition.onstart = ()=>{
-    isListening=true;
-    if (!isAuto) {
-      setActive(side); resetBubble(side);
-      const lang=side==='top'?topLang:botLang;
-      setStatus(lang.listenHint, side==='top'?'lt':'lb');
-    } else {
-      setStatus(settings.wake?'Say "translate"...':'Listening...','auto');
+  recognition.onstart = () => {
+    isListening = true;
+    if (!isAuto && !isWakeMode) {
+      setActive(side);
+      resetBubble(side);
+      setStatus((side==='top' ? topLang : botLang).activeHint, side==='top'?'lt':'lb');
     }
   };
 
-  recognition.onresult = (e)=>{
-    let interim='', final='';
-    for (let i=e.resultIndex; i<e.results.length; i++) {
-      const t=e.results[i][0].transcript;
-      if (e.results[i].isFinal) final+=t; else interim+=t;
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t; else interim += t;
     }
-    if (interim && !isAuto) showInterim(side, interim);
 
-    // Wake word detection
-    if (isAuto && settings.wake) {
-      const combined=(interim+final).toLowerCase();
-      if (combined.includes('translate') || combined.includes('traduz')) {
-        recognition._wakeDetected=true;
+    // Wake word listening
+    if (isWakeMode) {
+      const heard = (interim + final).toLowerCase();
+      if (heard.includes('translate') || heard.includes('traduz') || heard.includes('traducir')) {
+        recognition._wakeDetected = true;
         stopListening();
-        setTimeout(()=>{ if (autoLoopActive&&!isSpeaking) { setStatus('Listening...','auto'); startListening(null,true,true); }},400);
-        return;
       }
+      return;
     }
-    if (final) { recognition._final=final.trim(); stopListening(); }
+
+    if (!isAuto) showInterim(side, interim || final);
+    if (final) { recognition._final = final.trim(); stopListening(); }
   };
 
-  recognition.onerror = (e)=>{
-    if (e.error==='no-speech'||e.error==='aborted') return;
-    setStatus('Mic error: '+e.error,''); isListening=false; clearActive();
+  recognition.onerror = (e) => {
+    if (e.error === 'no-speech' || e.error === 'aborted') return;
+    setStatus('Mic error — try again', '');
+    isListening = false; clearActive();
   };
 
-  recognition.onend = ()=>{
-    isListening=false;
-    if (recognition._wakeDetected) return;
-    const text=recognition._final;
+  recognition.onend = () => {
+    isListening = false;
+
+    // Wake word detected — now listen for actual speech
+    if (recognition._wakeDetected) {
+      if (autoActive && !isSpeaking) {
+        setStatus('Listening...', 'au');
+        setTimeout(() => { if (autoActive && !isSpeaking) startListening(null, true, false); }, 350);
+      }
+      return;
+    }
+
+    const text = recognition._final;
+
     if (text) {
-      const detectedSide=isAuto?detectSide(text):side;
-      if (isAuto) resetBubble(detectedSide);
+      const detectedSide = recognition._isAuto ? detectSide(text) : recognition._side;
+      if (recognition._isAuto) resetBubble(detectedSide);
       setActive(detectedSide);
-      doTranslate(detectedSide, text, isAuto);
+      translate(detectedSide, text, recognition._isAuto);
     } else {
+      // No speech detected
       clearActive();
-      if (isAuto&&autoLoopActive) {
-        const wakeMode=settings.wake;
-        setStatus(wakeMode?'Say "translate"...':'Listening...','auto');
-        setTimeout(()=>{ if (autoLoopActive&&!isSpeaking) startListening(null,true); },300);
-      } else {
-        setStatus('Tap a flag to start','');
+      if (autoActive && !isSpeaking) {
+        const nextStatus = cfg.wake ? 'Say "translate"...' : 'Listening...';
+        setStatus(nextStatus, 'au');
+        setTimeout(() => {
+          if (autoActive && !isSpeaking) {
+            cfg.wake ? listenForWake() : autoListen();
+          }
+        }, 400);
+      } else if (!autoActive) {
+        setStatus('Tap a flag to speak', '');
       }
     }
   };
 
-  try { recognition.start(); } catch(e) { isListening=false; }
+  try { recognition.start(); } catch(e) {
+    console.error('SR start error:', e);
+    isListening = false;
+  }
 }
 
-function stopListening() { if (recognition) { try { recognition.stop(); } catch(e){} } }
-function autoListen() { if (!autoLoopActive||isSpeaking) return; startListening(null,true); }
+function stopListening() {
+  if (recognition) { try { recognition.stop(); } catch(e) {} }
+}
 
-// ─── TRANSLATION ─────────────────────────────────────────────────
-async function doTranslate(side, text, isAuto) {
+function autoListen()    { if (autoActive && !isSpeaking && !isListening) startListening(null, true, false); }
+function listenForWake() { if (autoActive && !isSpeaking && !isListening) startListening(null, false, true); }
+
+// ── TRANSLATION ────────────────────────────────────────────────────────
+async function translate(side, text, isAuto) {
   setStatus('Translating...', 'tr');
-  const fromLang = side === 'top' ? topLang : botLang;
-  const toLang   = side === 'top' ? botLang : topLang;
+  const from = side === 'top' ? topLang : botLang;
+  const to   = side === 'top' ? botLang : topLang;
 
-  // 1. Try offline first if loaded
+  // 1. Try offline model (PT↔EN only)
   if (modelEnToPt || modelPtToEn) {
     try {
-      const r = await offlineTranslate(text, fromLang, toLang);
-      if (r) {
-        showResult(side, text, r);
-        addHistory(text, r, toLang.ttsLang);
-        speak(r, toLang.ttsLang, isAuto);
-        return;
-      }
-    } catch(e) { console.warn('Offline failed, trying API:', e); }
+      const r = await offlineTranslate(text, from, to);
+      if (r) { showResult(side, text, r); addHistory(text, r, to.tts); speak(r, to.tts, isAuto); return; }
+    } catch(e) { /* fall through to API */ }
   }
 
-  // 2. Check real connectivity before attempting API
-  await checkOnline();
-  if (!isOnline) {
-    setStatus('No internet — connect WiFi or download offline model', '');
-    clearActive();
-    if (isAuto && autoLoopActive) setTimeout(() => { if (!isSpeaking) autoListen(); }, 2000);
-    return;
-  }
-
-  // 3. Claude API
+  // 2. Claude API
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -702,189 +754,199 @@ async function doTranslate(side, text, isAuto) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 300,
-        messages: [{ role: 'user', content: 'Translate from ' + fromLang.name + ' to ' + toLang.name + '. Reply with ONLY the translated text, no explanation or punctuation changes:\n\n' + text }]
+        messages: [{
+          role: 'user',
+          content: 'Translate the following from ' + from.name + ' to ' + to.name + '. Output ONLY the translated text with no explanations, labels, or extra punctuation:\n\n' + text
+        }]
       })
     });
+
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message || 'API error');
-    const translated = data && data.content && data.content[0] && data.content[0].text ? data.content[0].text.trim() : null;
-    if (!translated) throw new Error('Empty response');
-    showResult(side, text, translated);
-    addHistory(text, translated, toLang.ttsLang);
-    speak(translated, toLang.ttsLang, isAuto);
+    if (data.error) throw new Error(data.error.message);
+
+    const out = data.content && data.content[0] && data.content[0].text
+      ? data.content[0].text.trim() : null;
+    if (!out) throw new Error('Empty response');
+
+    showResult(side, text, out);
+    addHistory(text, out, to.tts);
+    speak(out, to.tts, isAuto);
+
   } catch(e) {
     console.error('Translation error:', e.message);
-    setStatus('Translation failed — tap flag to retry', '');
+    setStatus(navigator.onLine ? 'Translation failed — tap to retry' : 'No internet connection', '');
     clearActive();
-    if (isAuto && autoLoopActive) setTimeout(() => { if (!isSpeaking) autoListen(); }, 1500);
+    if (isAuto && autoActive) setTimeout(() => { if (!isSpeaking) autoListen(); }, 1500);
   }
 }
 
-// ─── TTS ─────────────────────────────────────────────────────────
-function speak(text,lang,isAuto) {
+// ── TTS ────────────────────────────────────────────────────────────────
+function speak(text, lang, isAuto) {
   window.speechSynthesis.cancel();
-  const utt=new SpeechSynthesisUtterance(text);
-  utt.lang=lang; utt.rate=settings.speed; utt.pitch=1;
-  const voices=window.speechSynthesis.getVoices();
-  const v=voices.find(x=>x.lang===lang)||voices.find(x=>x.lang.startsWith(lang.split('-')[0]));
-  if (v) utt.voice=v;
-  utt.onstart=()=>{ isSpeaking=true; setStatus('Speaking...','sp'); };
-  utt.onend=()=>{
-    isSpeaking=false; clearActive();
-    if (isAuto&&autoLoopActive) { setStatus(settings.wake?'Say "translate"...':'Listening...','auto'); setTimeout(()=>autoListen(),600); }
-    else setStatus('Tap a flag to start','');
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang  = lang;
+  utt.rate  = cfg.speed;
+  utt.pitch = 1;
+
+  // Try to find best matching voice
+  const voices = window.speechSynthesis.getVoices();
+  const exact  = voices.find(v => v.lang === lang);
+  const prefix = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+  if (exact)  utt.voice = exact;
+  else if (prefix) utt.voice = prefix;
+
+  utt.onstart = () => { isSpeaking = true; setStatus('Speaking...', 'sp'); };
+
+  utt.onend = () => {
+    isSpeaking = false; clearActive();
+    if (isAuto && autoActive) {
+      const nextStatus = cfg.wake ? 'Say "translate"...' : 'Listening...';
+      setStatus(nextStatus, 'au');
+      setTimeout(() => { if (autoActive && !isListening) cfg.wake ? listenForWake() : autoListen(); }, 700);
+    } else {
+      setStatus('Tap a flag to speak', '');
+    }
   };
-  utt.onerror=()=>{ isSpeaking=false; clearActive(); if (isAuto&&autoLoopActive) setTimeout(()=>autoListen(),600); else setStatus('Tap a flag to start',''); };
+
+  utt.onerror = () => {
+    isSpeaking = false; clearActive();
+    if (isAuto && autoActive) setTimeout(() => autoListen(), 700);
+    else setStatus('Tap a flag to speak', '');
+  };
+
   window.speechSynthesis.speak(utt);
 }
 
-// ─── HISTORY ─────────────────────────────────────────────────────
-function addHistory(original, translated, ttsLang) {
-  historyLog.unshift({ original, translated, ttsLang, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+// ── HISTORY ────────────────────────────────────────────────────────────
+function addHistory(orig, trans, ttsLang) {
+  historyLog.unshift({ orig, trans, ttsLang, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
   if (historyLog.length > 30) historyLog.pop();
 }
 
-function renderHistory() {
-  const list=document.getElementById('historyList');
-  if (!historyLog.length) { list.innerHTML='<div class="h-empty">No translations yet</div>'; return; }
-  list.innerHTML=historyLog.map((h,i)=>`
-    <div class="h-item">
-      <div class="h-texts">
-        <div class="h-orig">${h.time} · ${h.original}</div>
-        <div class="h-trans">${h.translated}</div>
-      </div>
-      <button class="h-play" onclick="replayHistory(${i})">▶</button>
-    </div>`).join('');
-}
-
-function replayHistory(i) { const h=historyLog[i]; if(h) speak(h.translated,h.ttsLang,false); }
-
-function toggleHistory() {
-  renderHistory();
-  const p=document.getElementById('historyPanel');
-  const open=p.classList.contains('open');
+function openHistory() {
+  const list = el('hList');
+  if (!historyLog.length) {
+    list.innerHTML = '<div class="hempty">No translations yet</div>';
+  } else {
+    list.innerHTML = historyLog.map((h, i) => `
+      <div class="hitem">
+        <div class="htexts">
+          <div class="horig">${h.time} · ${escHtml(h.orig)}</div>
+          <div class="htrans">${escHtml(h.trans)}</div>
+        </div>
+        <button class="hplay" onclick="replayH(${i})">▶</button>
+      </div>`).join('');
+  }
   closePanels();
-  if (!open) { p.classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+  el('histPanel').classList.add('open');
+  el('overlay').classList.add('show');
 }
 
-// ─── PHRASEBOOK ──────────────────────────────────────────────────
-function setPhrasesCat(cat) {
-  activePhrasesCat=cat;
-  document.querySelectorAll('.phrase-cat').forEach(el=>el.classList.toggle('active',el.textContent===cat));
+function replayH(i) { const h = historyLog[i]; if (h) speak(h.trans, h.ttsLang, false); }
+
+// ── PHRASEBOOK ─────────────────────────────────────────────────────────
+function setCat(cat) {
+  activeCat = cat;
+  document.querySelectorAll('.pcat').forEach(c => c.classList.toggle('on', c.textContent === cat));
   renderPhrases();
 }
 
 function renderPhrases() {
-  const list=document.getElementById('phraseList');
-  const phrases=PHRASES[activePhrasesCat]||[];
-  list.innerHTML=phrases.map((p,i)=>`
-    <div class="phrase-item" onclick="usePhrase(${i})">
-      <div class="phrase-texts">
-        <div class="phrase-en">${p.en}</div>
-        <div class="phrase-pt">${p.pt}</div>
+  el('pList').innerHTML = (PHRASES[activeCat] || []).map((p, i) => `
+    <div class="pitem" onclick="usePhrase(${i})">
+      <div class="ptexts">
+        <div class="pen">${escHtml(p.en)}</div>
+        <div class="ppt">${escHtml(p.pt)}</div>
       </div>
-      <div class="phrase-go">▶</div>
+      <div class="pgo">▶</div>
     </div>`).join('');
 }
 
 function usePhrase(i) {
-  const p=PHRASES[activePhrasesCat][i];
+  const p = PHRASES[activeCat][i];
   if (!p) return;
   closePanels();
-  // Show in bottom bubble (English person saying to PT person)
+
+  // Always show EN as original, PT as translation
+  // Speak in Portuguese (to the PT-speaking person)
+  const ptLang = (topLang && topLang.id === 'pt') ? topLang : (botLang && botLang.id === 'pt') ? botLang : null;
+  const ttsL = ptLang ? ptLang.tts : 'pt-BR';
+
+  // Show result in bottom half (English person's side initiating)
+  const showSide = (botLang && botLang.id !== 'pt') ? 'top' : 'bot';
   showResult('bot', p.en, p.pt);
-  addHistory(p.en, p.pt, topLang?.ttsLang||'pt-BR');
-  speak(p.pt, topLang?.id==='pt'?topLang.ttsLang:(botLang?.ttsLang||'pt-BR'), false);
+  addHistory(p.en, p.pt, ttsL);
+  speak(p.pt, ttsL, false);
 }
 
-function togglePhrases() {
-  const p=document.getElementById('phrasePanel');
-  const open=p.classList.contains('open');
+function openPhrases() {
   closePanels();
-  if (!open) { p.classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+  el('phrasePanel').classList.add('open');
+  el('overlay').classList.add('show');
 }
 
 function closePanels() {
-  document.getElementById('historyPanel').classList.remove('open');
-  document.getElementById('phrasePanel').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
+  el('histPanel').classList.remove('open');
+  el('phrasePanel').classList.remove('open');
+  el('overlay').classList.remove('show');
 }
 
-// ─── OFFLINE MODEL ────────────────────────────────────────────────
-// Uses two separate small models: EN→PT and PT→EN
-// Xenova/opus-mt-en-mul (multilingual) and Xenova/opus-mt-mul-en
-let modelEnToPt = null;
-let modelPtToEn = null;
-let modelLoading = false;
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-async function offlineTranslate(text, fromLang, toLang) {
-  const pair = fromLang.id + '-' + toLang.id;
+// ── OFFLINE MODEL ──────────────────────────────────────────────────────
+let modelEnToPt = null, modelPtToEn = null, modelLoading = false;
+
+async function offlineTranslate(text, from, to) {
+  const pair = from.id + '-' + to.id;
   if (pair === 'en-pt' && modelEnToPt) {
-    const r = await modelEnToPt(text);
-    return r[0]?.translation_text || null;
+    const r = await modelEnToPt(text); return r[0]?.translation_text || null;
   }
   if (pair === 'pt-en' && modelPtToEn) {
-    const r = await modelPtToEn(text);
-    return r[0]?.translation_text || null;
+    const r = await modelPtToEn(text); return r[0]?.translation_text || null;
   }
   return null;
 }
 
 async function loadOfflineModel() {
-  if (modelLoading) return;
-  if (modelEnToPt && modelPtToEn) return;
+  if (modelLoading || (modelEnToPt && modelPtToEn)) return;
   modelLoading = true;
-  updateOfflineBtn('Starting download...');
-
+  setDlBtn('Starting...');
   try {
     const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js');
     env.allowLocalModels = false;
-    env.useBrowserCache = true;
+    env.useBrowserCache  = true;
 
-    // Load EN→PT (~80MB)
-    updateOfflineBtn('Downloading EN→PT model...');
+    setDlBtn('Downloading EN→PT (1/2)...');
     modelEnToPt = await pipeline('translation', 'Xenova/opus-mt-en-mul', {
-      progress_callback: (p) => {
-        if (p.status === 'downloading') {
-          updateOfflineBtn(`EN→PT: ${Math.round(p.progress || 0)}%`);
-        }
-      }
+      progress_callback: p => { if (p.status==='downloading') setDlBtn('EN→PT ' + Math.round(p.progress||0) + '%'); }
     });
 
-    // Load PT→EN (~80MB)
-    updateOfflineBtn('Downloading PT→EN model...');
+    setDlBtn('Downloading PT→EN (2/2)...');
     modelPtToEn = await pipeline('translation', 'Xenova/opus-mt-mul-en', {
-      progress_callback: (p) => {
-        if (p.status === 'downloading') {
-          updateOfflineBtn(`PT→EN: ${Math.round(p.progress || 0)}%`);
-        }
-      }
+      progress_callback: p => { if (p.status==='downloading') setDlBtn('PT→EN ' + Math.round(p.progress||0) + '%'); }
     });
 
-    const btn = document.getElementById('offlineBtn');
-    btn.textContent = '✓ Offline Ready (PT↔EN)';
-    btn.style.borderColor = 'var(--green)';
-    btn.style.color = 'var(--green)';
-    btn.onclick = null;
-    btn.style.cursor = 'default';
-
+    const b = el('dlBtn');
+    b.textContent = '✓ Offline Ready — PT ↔ EN';
+    b.style.borderColor = 'var(--green)';
+    b.style.color = 'var(--green)';
+    b.onclick = null;
+    b.style.cursor = 'default';
   } catch(e) {
-    console.error('Offline model error:', e);
-    modelLoading = false;
-    modelEnToPt = null;
-    modelPtToEn = null;
-    updateOfflineBtn('⬇ Retry Download');
+    console.error('Model download failed:', e);
+    modelLoading = false; modelEnToPt = null; modelPtToEn = null;
+    setDlBtn('⬇ Retry Download');
   }
 }
 
-function updateOfflineBtn(text) { const b=document.getElementById('offlineBtn'); if(b) b.textContent=text; }
+function setDlBtn(t) { const b = el('dlBtn'); if (b) b.textContent = t; }
 
-// ─── INIT ─────────────────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────────────────────
 window.speechSynthesis.getVoices();
-window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&settings.screen) manageWakeLock(); });
-buildGrids();
+window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) handleWakeLock(); });
+buildUI();
 </script>
 
 </body>
