@@ -16,58 +16,63 @@
 }
 html, body { height: 100%; width: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow: hidden; }
 
-/* ── PICKER SCREEN ── */
+/* ── PICKER ── */
 #pickerScreen {
 display: flex; flex-direction: column; align-items: center; justify-content: center;
-height: 100dvh; padding: 24px 20px; gap: 0;
+height: 100dvh; padding: 20px; gap: 0; overflow-y: auto;
 }
-.picker-title { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(–muted); margin-bottom: 28px; }
-.picker-section { width: 100%; max-width: 380px; margin-bottom: 20px; }
-.picker-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(–muted); margin-bottom: 10px; padding-left: 2px; }
-.lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.picker-title { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(–muted); margin-bottom: 20px; }
+.picker-section { width: 100%; max-width: 380px; margin-bottom: 16px; }
+.picker-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(–muted); margin-bottom: 8px; padding-left: 2px; }
+.lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .lang-btn {
 background: var(–card); border: 2px solid var(–border); border-radius: 14px;
-padding: 14px 12px; cursor: pointer; transition: all 0.2s;
-display: flex; align-items: center; gap: 10px; position: relative;
+padding: 12px 10px; cursor: pointer; transition: all 0.2s;
+display: flex; align-items: center; gap: 8px; position: relative;
 }
-.lang-btn:active { transform: scale(0.97); }
-.lang-btn.selected-top {
-border-color: var(–green);
-background: rgba(0,229,160,0.18);
-box-shadow: 0 0 0 1px var(–green), inset 0 0 20px rgba(0,229,160,0.08);
-}
-.lang-btn.selected-bottom {
-border-color: var(–blue);
-background: rgba(77,140,255,0.18);
-box-shadow: 0 0 0 1px var(–blue), inset 0 0 20px rgba(77,140,255,0.08);
-}
-/* checkmark badge */
-.lang-btn.selected-top::after, .lang-btn.selected-bottom::after {
-content: ‘✓’; position: absolute; top: 7px; right: 10px;
-font-size: 13px; font-weight: 800;
-}
+.lang-btn.selected-top    { border-color: var(–green); background: rgba(0,229,160,0.15); box-shadow: 0 0 0 1px var(–green); }
+.lang-btn.selected-bottom { border-color: var(–blue);  background: rgba(77,140,255,0.15); box-shadow: 0 0 0 1px var(–blue); }
+.lang-btn.selected-top::after, .lang-btn.selected-bottom::after { content: ‘✓’; position: absolute; top: 6px; right: 8px; font-size: 12px; font-weight: 800; }
 .lang-btn.selected-top::after    { color: var(–green); }
 .lang-btn.selected-bottom::after { color: var(–blue); }
-
-.lang-flag { font-size: 26px; line-height: 1; flex-shrink: 0; }
-.lang-info { text-align: left; }
-.lang-name { font-size: 13px; font-weight: 700; color: var(–text); transition: color 0.2s; }
-.lang-sub  { font-size: 10px; color: var(–muted); margin-top: 2px; }
+.lang-flag { font-size: 24px; line-height: 1; flex-shrink: 0; }
+.lang-name { font-size: 12px; font-weight: 700; color: var(–text); }
+.lang-sub  { font-size: 9px; color: var(–muted); margin-top: 1px; }
 .lang-btn.selected-top    .lang-name { color: var(–green); }
 .lang-btn.selected-bottom .lang-name { color: var(–blue); }
 
-.picker-divider { width: 100%; max-width: 380px; height: 1px; background: var(–border); margin: 4px 0 20px; }
+.picker-divider { width: 100%; max-width: 380px; height: 1px; background: var(–border); margin: 4px 0 16px; }
+
+/* Mode toggle */
+.mode-toggle { display: flex; width: 100%; max-width: 380px; gap: 8px; margin-bottom: 12px; }
+.mode-opt {
+flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(–border);
+background: var(–card); cursor: pointer; text-align: center; transition: all 0.2s;
+}
+.mode-opt.active { border-color: var(–orange); background: rgba(255,170,0,0.1); }
+.mode-opt-icon { font-size: 20px; margin-bottom: 4px; }
+.mode-opt-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(–muted); }
+.mode-opt.active .mode-opt-label { color: var(–orange); }
+.mode-opt-desc { font-size: 9px; color: var(–muted); margin-top: 2px; line-height: 1.3; }
 
 .start-btn {
-width: 100%; max-width: 380px; padding: 16px;
+width: 100%; max-width: 380px; padding: 15px;
 background: linear-gradient(135deg, var(–green), var(–blue));
 border: none; border-radius: 16px; cursor: pointer;
-font-family: ‘Syne’, sans-serif; font-size: 15px; font-weight: 800;
+font-family: ‘Syne’, sans-serif; font-size: 14px; font-weight: 800;
 color: #080810; letter-spacing: 1px; transition: opacity 0.2s, transform 0.15s;
-margin-top: 8px;
 }
 .start-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 .start-btn:not(:disabled):active { transform: scale(0.98); }
+
+.offline-btn {
+margin-top: 10px; width: 100%; max-width: 380px;
+background: none; border: 1px solid var(–border); border-radius: 12px;
+padding: 10px; font-family: ‘Syne’, sans-serif; font-size: 10px;
+letter-spacing: 2px; text-transform: uppercase; color: var(–muted);
+cursor: pointer; transition: all 0.2s;
+}
+.offline-note { font-size: 9px; color: var(–muted); margin-top: 5px; letter-spacing: 1px; text-align: center; }
 
 /* ── TRANSLATE SCREEN ── */
 #translateScreen { display: none; flex-direction: column; height: 100dvh; width: 100%; }
@@ -77,12 +82,15 @@ flex: 1; display: flex; flex-direction: column;
 align-items: center; justify-content: center;
 gap: 12px; padding: 18px 18px 14px;
 cursor: pointer; user-select: none;
-transition: background 0.25s; background: var(–mid);
-position: relative;
+transition: background 0.3s; background: var(–mid); position: relative;
 }
 .half.top { transform: rotate(180deg); border-bottom: 1px solid var(–border); }
 .half.active-top    { background: var(–green-bg); }
 .half.active-bottom { background: var(–blue-bg); }
+
+/* Auto mode — whole screen glows when listening */
+.half.auto-listening-top    { background: rgba(0,229,160,0.05); }
+.half.auto-listening-bottom { background: rgba(77,140,255,0.05); }
 
 .divider {
 height: 50px; display: flex; align-items: center; justify-content: center;
@@ -92,22 +100,24 @@ flex-shrink: 0; position: relative; z-index: 10;
 .status-pill {
 font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
 color: var(–muted); padding: 6px 16px; border-radius: 999px;
-border: 1px solid var(–border); transition: all 0.25s; white-space: nowrap;
+border: 1px solid var(–border); transition: all 0.25s; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis;
 }
 .status-pill.lt { color: var(–green); border-color: var(–green); background: var(–green-bg); }
 .status-pill.lb { color: var(–blue);  border-color: var(–blue);  background: var(–blue-bg); }
 .status-pill.tr { color: var(–orange); border-color: var(–orange); }
 .status-pill.sp { color: var(–blue);   border-color: var(–blue); }
+.status-pill.auto { color: var(–orange); border-color: var(–orange); background: rgba(255,170,0,0.07); animation: breathe 2s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
-.change-btn {
-position: absolute; right: 12px;
+.divider-right { position: absolute; right: 10px; display: flex; gap: 6px; }
+.icon-btn {
 background: none; border: 1px solid var(–border); border-radius: 8px;
 color: var(–muted); font-family: ‘Syne’, sans-serif; font-size: 10px;
 letter-spacing: 1px; padding: 4px 10px; cursor: pointer; transition: all 0.2s;
 }
-.change-btn:hover { color: var(–text); border-color: var(–muted); }
+.icon-btn:hover { color: var(–text); border-color: var(–muted); }
 
-.person-flag { font-size: 48px; line-height: 1; transition: transform 0.2s; }
+.person-flag { font-size: 46px; line-height: 1; transition: transform 0.2s; }
 .half.active-top .person-flag, .half.active-bottom .person-flag { transform: scale(1.1); }
 
 .person-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(–muted); transition: color 0.2s; }
@@ -117,7 +127,7 @@ letter-spacing: 1px; padding: 4px 10px; cursor: pointer; transition: all 0.2s;
 .bubble {
 background: var(–card); border: 1px solid var(–border);
 border-radius: 16px; padding: 12px 14px; width: 100%;
-max-width: 340px; min-height: 60px;
+max-width: 340px; min-height: 58px;
 display: flex; flex-direction: column; gap: 7px; transition: border-color 0.25s;
 }
 .half.active-top    .bubble { border-color: var(–green); }
@@ -142,6 +152,16 @@ font-size: 14px; transition: all 0.25s; flex-shrink: 0;
 .half.active-top .tap-ring    { border-color: var(–green); box-shadow: 0 0 12px rgba(0,229,160,0.3); animation: rp 1.2s ease-in-out infinite; }
 .half.active-bottom .tap-ring { border-color: var(–blue);  box-shadow: 0 0 12px rgba(77,140,255,0.3); animation: rp 1.2s ease-in-out infinite; }
 @keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
+
+/* Auto mode mic pulse in center */
+.auto-orb {
+display: none; width: 56px; height: 56px; border-radius: 50%;
+background: var(–card); border: 1.5px solid var(–border);
+align-items: center; justify-content: center; font-size: 22px;
+transition: all 0.3s;
+}
+.auto-orb.show { display: flex; }
+.auto-orb.active { border-color: var(–orange); box-shadow: 0 0 20px rgba(255,170,0,0.3); animation: rp 1s ease-in-out infinite; }
 </style>
 
 </head>
@@ -150,7 +170,7 @@ font-size: 14px; transition: all 0.25s; flex-shrink: 0;
 <!-- ── PICKER SCREEN ── -->
 
 <div id="pickerScreen">
-  <div class="picker-title">🌐 Select Two Languages</div>
+  <div class="picker-title">🌐 Translator</div>
 
   <div class="picker-section">
     <div class="picker-label">Person 1 (top)</div>
@@ -164,14 +184,33 @@ font-size: 14px; transition: all 0.25s; flex-shrink: 0;
     <div class="lang-grid" id="grid2"></div>
   </div>
 
+  <!-- Mode selector -->
+
+  <div class="picker-label" style="width:100%;max-width:380px;margin-bottom:8px;">Mode</div>
+  <div class="mode-toggle">
+    <div class="mode-opt active" id="modeManual" onclick="setMode('manual')">
+      <div class="mode-opt-icon">👆</div>
+      <div class="mode-opt-label">Manual</div>
+      <div class="mode-opt-desc">Tap your flag to speak</div>
+    </div>
+    <div class="mode-opt" id="modeAuto" onclick="setMode('auto')">
+      <div class="mode-opt-icon">🎙️</div>
+      <div class="mode-opt-label">Auto</div>
+      <div class="mode-opt-desc">Always listening, detects language</div>
+    </div>
+  </div>
+
 <button class="start-btn" id="startBtn" disabled onclick="startTranslating()">Start Translating →</button>
 
+<button id="offlineBtn" class="offline-btn" onclick="loadOfflineModel()">⬇ Download Offline Model (PT↔EN)</button>
+
+  <div class="offline-note">~150MB · one-time · works without internet after</div>
 </div>
 
 <!-- ── TRANSLATE SCREEN ── -->
 
 <div id="translateScreen">
-  <div class="half top" id="halfTop" onclick="handleTap('top')">
+  <div class="half top" id="halfTop">
     <div class="person-flag" id="topFlag"></div>
     <div class="person-label" id="topLabel"></div>
     <div class="bubble">
@@ -187,10 +226,12 @@ font-size: 14px; transition: all 0.25s; flex-shrink: 0;
 
   <div class="divider">
     <div class="status-pill" id="statusPill">Tap a flag to start</div>
-    <button class="change-btn" onclick="goBack()">⇠ Change</button>
+    <div class="divider-right">
+      <button class="icon-btn" onclick="goBack()">⇠ Change</button>
+    </div>
   </div>
 
-  <div class="half bottom" id="halfBot" onclick="handleTap('bot')">
+  <div class="half bottom" id="halfBot">
     <div class="person-flag" id="botFlag"></div>
     <div class="person-label" id="botLabel"></div>
     <div class="bubble">
@@ -208,23 +249,46 @@ font-size: 14px; transition: all 0.25s; flex-shrink: 0;
 <script>
 // ── Language definitions ──────────────────────────────────────────
 const LANGS = [
-  { id: 'en',   flag: '🇺🇸', name: 'English',        sub: 'United States',      srLang: 'en-US',  ttsLang: 'en-US',  tapHint: 'tap to speak',          listenHint: 'listening...' },
-  { id: 'pt',   flag: '🇧🇷', name: 'Português',       sub: 'Brasil',             srLang: 'pt-BR',  ttsLang: 'pt-BR',  tapHint: 'toque para falar',       listenHint: 'ouvindo...' },
-  { id: 'fa',   flag: '🇦🇫', name: 'دری / Dari',      sub: 'Afghanistan',        srLang: 'fa-AF',  ttsLang: 'fa-IR',  tapHint: 'برای صحبت لمس کنید',    listenHint: 'در حال گوش دادن...' },
-  { id: 'fr',   flag: '🇨🇦', name: 'Français',        sub: 'Canada',             srLang: 'fr-CA',  ttsLang: 'fr-CA',  tapHint: 'toucher pour parler',    listenHint: 'écoute...' },
-  { id: 'es',   flag: '🇩🇴', name: 'Español',         sub: 'República Dominicana', srLang: 'es-DO', ttsLang: 'es-DO', tapHint: 'toca para hablar',       listenHint: 'escuchando...' },
+  { id:'en', flag:'🇺🇸', name:'English',   sub:'United States',       srLang:'en-US', ttsLang:'en-US', tapHint:'tap to speak',        listenHint:'listening...' },
+  { id:'pt', flag:'🇧🇷', name:'Português', sub:'Brasil',              srLang:'pt-BR', ttsLang:'pt-BR', tapHint:'toque para falar',    listenHint:'ouvindo...' },
+  { id:'fa', flag:'🇦🇫', name:'دری',       sub:'Afghanistan',         srLang:'fa-AF', ttsLang:'fa-IR', tapHint:'لمس کنید',           listenHint:'گوش میدهم...' },
+  { id:'fr', flag:'🇨🇦', name:'Français',  sub:'Canada',              srLang:'fr-CA', ttsLang:'fr-CA', tapHint:'toucher pour parler', listenHint:'écoute...' },
+  { id:'es', flag:'🇩🇴', name:'Español',   sub:'Rep. Dominicana',     srLang:'es-DO', ttsLang:'es-DO', tapHint:'toca para hablar',    listenHint:'escuchando...' },
 ];
 
-// ── Picker state ──────────────────────────────────────────────────
-let sel1 = null, sel2 = null;
+// PT language detection keywords
+const PT_PATTERNS = /\b(eu|você|voce|ele|ela|nós|nos|eles|mas|não|nao|com|para|uma|isso|esse|esta|como|mais|por|muito|quando|então|entao|que|em|de|do|da|no|na|ao|um|os|as|seu|sua|meu|minha|tem|são|sao|está|esta|foi|ser|ter|fazer|quero|preciso|obrigado|obrigada|sim|bom|boa|tudo|bem|olá|ola|oi|tchau|falar|aqui|hoje|amanhã|amanha|sempre|nunca|também|tambem|já|ja|agora|depois|porque|legal|cara|gente|tá|ta|né|ne)\b/i;
+const PT_CHARS   = /[ãõâêîôûàáéíóúç]/i;
 
+function detectSide(text) {
+  // Returns 'top' or 'bot' based on language detection
+  const score = (PT_PATTERNS.test(text) ? 2 : 0) + (PT_CHARS.test(text) ? 3 : 0);
+  const isPortuguese = score >= 2;
+  // Match to whichever side has that language
+  if (topLang.id === 'pt') return isPortuguese ? 'top' : 'bot';
+  if (botLang.id === 'pt') return isPortuguese ? 'bot' : 'top';
+  // Fallback — can't detect, default to bottom
+  return 'bot';
+}
+
+// ── State ─────────────────────────────────────────────────────────
+let sel1 = null, sel2 = null, appMode = 'manual';
+let topLang = null, botLang = null;
+let activeSide = null, isListening = false, isSpeaking = false;
+let recognition = null, isOnline = navigator.onLine;
+let autoLoopActive = false;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+window.addEventListener('online',  () => isOnline = true);
+window.addEventListener('offline', () => isOnline = false);
+
+// ── Picker ────────────────────────────────────────────────────────
 function buildGrids() {
   ['grid1','grid2'].forEach((gid, gi) => {
-    const grid = document.getElementById(gid);
-    grid.innerHTML = LANGS.map(l => `
+    document.getElementById(gid).innerHTML = LANGS.map(l => `
       <div class="lang-btn" id="${gid}-${l.id}" onclick="selectLang(${gi+1},'${l.id}')">
         <div class="lang-flag">${l.flag}</div>
-        <div class="lang-info">
+        <div>
           <div class="lang-name">${l.name}</div>
           <div class="lang-sub">${l.sub}</div>
         </div>
@@ -233,53 +297,57 @@ function buildGrids() {
 }
 
 function selectLang(person, id) {
-  // Prevent same language on both sides
   if (person === 1 && sel2 === id) return;
   if (person === 2 && sel1 === id) return;
-
-  if (person === 1) sel1 = id;
-  else              sel2 = id;
-
-  // Update visual selection
+  if (person === 1) sel1 = id; else sel2 = id;
   LANGS.forEach(l => {
-    const b1 = document.getElementById('grid1-' + l.id);
-    const b2 = document.getElementById('grid2-' + l.id);
-    b1.className = 'lang-btn' + (sel1 === l.id ? ' selected-top' : '');
-    b2.className = 'lang-btn' + (sel2 === l.id ? ' selected-bottom' : '');
+    document.getElementById('grid1-'+l.id).className = 'lang-btn' + (sel1===l.id ? ' selected-top' : '');
+    document.getElementById('grid2-'+l.id).className = 'lang-btn' + (sel2===l.id ? ' selected-bottom' : '');
   });
-
   document.getElementById('startBtn').disabled = !(sel1 && sel2);
 }
 
-// ── Translation screen ────────────────────────────────────────────
-let topLang = null, botLang = null;
-let activeSide = null, isListening = false, isSpeaking = false, recognition = null;
-let isOnline = navigator.onLine;
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function setMode(mode) {
+  appMode = mode;
+  document.getElementById('modeManual').classList.toggle('active', mode === 'manual');
+  document.getElementById('modeAuto').classList.toggle('active', mode === 'auto');
+}
 
-window.addEventListener('online',  () => isOnline = true);
-window.addEventListener('offline', () => isOnline = false);
-
+// ── Start ─────────────────────────────────────────────────────────
 function startTranslating() {
   topLang = LANGS.find(l => l.id === sel1);
   botLang = LANGS.find(l => l.id === sel2);
 
-  // Set up UI
   document.getElementById('topFlag').textContent  = topLang.flag;
   document.getElementById('topLabel').textContent = topLang.name;
-  document.getElementById('topHint').textContent  = topLang.tapHint;
-  document.getElementById('topOrig').textContent  = topLang.tapHint;
+  document.getElementById('topHint').textContent  = appMode === 'auto' ? '' : topLang.tapHint;
+  document.getElementById('topOrig').textContent  = appMode === 'auto' ? '...' : topLang.tapHint;
 
   document.getElementById('botFlag').textContent  = botLang.flag;
   document.getElementById('botLabel').textContent = botLang.name;
-  document.getElementById('botHint').textContent  = botLang.tapHint;
-  document.getElementById('botOrig').textContent  = botLang.tapHint;
+  document.getElementById('botHint').textContent  = appMode === 'auto' ? '' : botLang.tapHint;
+  document.getElementById('botOrig').textContent  = appMode === 'auto' ? '...' : botLang.tapHint;
+
+  if (appMode === 'manual') {
+    // Attach tap handlers
+    document.getElementById('halfTop').onclick = () => handleTap('top');
+    document.getElementById('halfBot').onclick = () => handleTap('bot');
+    setStatus('Tap a flag to start', '');
+  } else {
+    // Auto mode — remove tap, start auto loop
+    document.getElementById('halfTop').onclick = null;
+    document.getElementById('halfBot').onclick = null;
+    setStatus('Listening...', 'auto');
+    autoLoopActive = true;
+    autoListen();
+  }
 
   document.getElementById('pickerScreen').style.display = 'none';
   document.getElementById('translateScreen').style.display = 'flex';
 }
 
 function goBack() {
+  autoLoopActive = false;
   if (isListening) stopListening();
   window.speechSynthesis.cancel();
   document.getElementById('translateScreen').style.display = 'none';
@@ -287,6 +355,7 @@ function goBack() {
   clearActive();
 }
 
+// ── UI helpers ────────────────────────────────────────────────────
 function setStatus(text, cls) {
   const p = document.getElementById('statusPill');
   p.textContent = text; p.className = 'status-pill ' + (cls || '');
@@ -296,18 +365,14 @@ function setActive(side) {
   activeSide = side;
   const ht = document.getElementById('halfTop');
   const hb = document.getElementById('halfBot');
-  ht.classList.toggle('active-top',    side === 'top');
-  ht.classList.remove('active-bottom');
-  hb.classList.toggle('active-bottom', side === 'bot');
-  hb.classList.remove('active-top');
-
+  ht.classList.remove('active-top','active-bottom');
+  hb.classList.remove('active-top','active-bottom');
+  ht.classList.add(side === 'top' ? 'active-top' : '');
+  hb.classList.add(side === 'bot' ? 'active-bottom' : '');
   document.getElementById('topRing').textContent = side === 'top' ? '🔴' : '🎙️';
   document.getElementById('botRing').textContent = side === 'bot' ? '🔴' : '🎙️';
-
-  const tl = side === 'top' ? topLang : botLang;
-  const bl = side === 'bot' ? botLang : topLang;
-  document.getElementById('topHint').textContent = side === 'top' ? topLang.listenHint : topLang.tapHint;
-  document.getElementById('botHint').textContent = side === 'bot' ? botLang.listenHint : botLang.tapHint;
+  document.getElementById('topHint').textContent = side === 'top' ? topLang.listenHint : (appMode==='auto'?'':topLang.tapHint);
+  document.getElementById('botHint').textContent = side === 'bot' ? botLang.listenHint : (appMode==='auto'?'':botLang.tapHint);
 }
 
 function clearActive() {
@@ -316,55 +381,66 @@ function clearActive() {
   document.getElementById('halfBot').classList.remove('active-top','active-bottom');
   document.getElementById('topRing').textContent = '🎙️';
   document.getElementById('botRing').textContent = '🎙️';
-  if (topLang) document.getElementById('topHint').textContent = topLang.tapHint;
-  if (botLang) document.getElementById('botHint').textContent = botLang.tapHint;
+  if (topLang) document.getElementById('topHint').textContent = appMode==='auto' ? '' : topLang.tapHint;
+  if (botLang) document.getElementById('botHint').textContent = appMode==='auto' ? '' : botLang.tapHint;
 }
 
 function resetBubble(side) {
-  const orig  = document.getElementById(side === 'top' ? 'topOrig'  : 'botOrig');
-  const div   = document.getElementById(side === 'top' ? 'topDiv'   : 'botDiv');
-  const trans = document.getElementById(side === 'top' ? 'topTrans' : 'botTrans');
+  const orig  = document.getElementById(side==='top' ? 'topOrig'  : 'botOrig');
+  const div   = document.getElementById(side==='top' ? 'topDiv'   : 'botDiv');
+  const trans = document.getElementById(side==='top' ? 'topTrans' : 'botTrans');
   orig.textContent = '...'; orig.className = 'b-orig interim';
-  div.className = 'b-div'; trans.className = 'b-trans ' + (side === 'top' ? 'top-trans' : 'bottom-trans');
+  div.className = 'b-div';
+  trans.className = 'b-trans ' + (side==='top' ? 'top-trans' : 'bottom-trans');
 }
 
 function showInterim(side, text) {
-  const orig = document.getElementById(side === 'top' ? 'topOrig' : 'botOrig');
+  const orig = document.getElementById(side==='top' ? 'topOrig' : 'botOrig');
   orig.textContent = text; orig.className = 'b-orig interim';
 }
 
 function showResult(side, original, translation) {
-  const orig  = document.getElementById(side === 'top' ? 'topOrig'  : 'botOrig');
-  const div   = document.getElementById(side === 'top' ? 'topDiv'   : 'botDiv');
-  const trans = document.getElementById(side === 'top' ? 'topTrans' : 'botTrans');
+  const orig  = document.getElementById(side==='top' ? 'topOrig'  : 'botOrig');
+  const div   = document.getElementById(side==='top' ? 'topDiv'   : 'botDiv');
+  const trans = document.getElementById(side==='top' ? 'topTrans' : 'botTrans');
   orig.textContent = original; orig.className = 'b-orig';
   div.className = 'b-div show';
-  trans.textContent = translation; trans.className = 'b-trans show ' + (side === 'top' ? 'top-trans' : 'bottom-trans');
+  trans.textContent = translation;
+  trans.className = 'b-trans show ' + (side==='top' ? 'top-trans' : 'bottom-trans');
 }
 
+// ── Manual tap handler ────────────────────────────────────────────
 function handleTap(side) {
   if (isSpeaking) { window.speechSynthesis.cancel(); isSpeaking = false; }
   if (isListening && activeSide === side) { stopListening(); return; }
   if (isListening) stopListening();
-  startListening(side);
+  startListening(side, false);
 }
 
-function startListening(side) {
-  if (!SR) { setStatus('Browser not supported', ''); return; }
-  const lang = side === 'top' ? topLang : botLang;
+// ── Recognition ───────────────────────────────────────────────────
+function startListening(side, isAuto) {
+  if (!SR) { setStatus('Not supported', ''); return; }
+  // In auto mode, use the language of whichever side we think will speak
+  // We listen with pt-BR first (catches PT chars), fallback detect after
+  const listenLang = isAuto ? 'pt-BR' : (side === 'top' ? topLang.srLang : botLang.srLang);
 
   recognition = new SR();
   recognition.continuous = false;
   recognition.interimResults = true;
-  recognition.lang = lang.srLang;
+  recognition.lang = listenLang;
   recognition.maxAlternatives = 1;
   recognition._final = '';
 
   recognition.onstart = () => {
     isListening = true;
-    setActive(side);
-    resetBubble(side);
-    setStatus(lang.listenHint, side === 'top' ? 'lt' : 'lb');
+    if (!isAuto) {
+      setActive(side);
+      resetBubble(side);
+      const lang = side === 'top' ? topLang : botLang;
+      setStatus(lang.listenHint, side==='top'?'lt':'lb');
+    } else {
+      setStatus('Listening...', 'auto');
+    }
   };
 
   recognition.onresult = (e) => {
@@ -373,33 +449,72 @@ function startListening(side) {
       const t = e.results[i][0].transcript;
       if (e.results[i].isFinal) final += t; else interim += t;
     }
-    if (interim) showInterim(side, interim);
+    if (interim && !isAuto) showInterim(side, interim);
     if (final) { recognition._final = final.trim(); stopListening(); }
   };
 
   recognition.onerror = (e) => {
     if (e.error === 'no-speech' || e.error === 'aborted') return;
-    setStatus('Mic error: ' + e.error, ''); isListening = false; clearActive();
+    setStatus('Mic error: ' + e.error, '');
+    isListening = false; clearActive();
   };
 
   recognition.onend = () => {
     isListening = false;
     const text = recognition._final;
-    if (text) doTranslate(side, text);
-    else { clearActive(); setStatus('Tap a flag to start', ''); }
+    if (text) {
+      // Detect which side based on language
+      const detectedSide = isAuto ? detectSide(text) : side;
+      if (isAuto) resetBubble(detectedSide);
+      setActive(detectedSide);
+      doTranslate(detectedSide, text, isAuto);
+    } else {
+      clearActive();
+      if (isAuto && autoLoopActive) {
+        setStatus('Listening...', 'auto');
+        setTimeout(() => { if (autoLoopActive && !isSpeaking) startListening(null, true); }, 300);
+      } else {
+        setStatus('Tap a flag to start', '');
+      }
+    }
   };
 
-  try { recognition.start(); } catch(e) { setStatus('Mic error', ''); isListening = false; }
+  try { recognition.start(); } catch(e) { isListening = false; }
 }
 
 function stopListening() {
   if (recognition) { try { recognition.stop(); } catch(e) {} }
 }
 
-async function doTranslate(side, text) {
+function autoListen() {
+  if (!autoLoopActive || isSpeaking) return;
+  startListening(null, true);
+}
+
+// ── Translation ───────────────────────────────────────────────────
+async function doTranslate(side, text, isAuto) {
   setStatus('Translating...', 'tr');
   const fromLang = side === 'top' ? topLang : botLang;
   const toLang   = side === 'top' ? botLang : topLang;
+
+  // Try offline first
+  if (offlineTranslator) {
+    try {
+      const result = await offlineTranslate(text, fromLang, toLang);
+      if (result) {
+        showResult(side, text, result);
+        speak(result, toLang.ttsLang, isAuto);
+        return;
+      }
+    } catch(e) {}
+  }
+
+  if (!isOnline) {
+    setStatus('⚡ No internet — download offline model', '');
+    clearActive();
+    if (isAuto && autoLoopActive) setTimeout(() => { if (!isSpeaking) autoListen(); }, 2000);
+    return;
+  }
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -408,32 +523,84 @@ async function doTranslate(side, text) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 300,
-        messages: [{ role: 'user', content: `Translate the following text from ${fromLang.name} to ${toLang.name}. Reply with ONLY the translation, nothing else:\n\n${text}` }]
+        messages: [{ role: 'user', content: `Translate from ${fromLang.name} to ${toLang.name}. Reply with ONLY the translation:\n\n${text}` }]
       })
     });
     const data = await res.json();
     const translated = data?.content?.[0]?.text?.trim();
     if (!translated) throw new Error('empty');
     showResult(side, text, translated);
-    speak(translated, toLang.ttsLang);
+    speak(translated, toLang.ttsLang, isAuto);
   } catch(e) {
-    setStatus(isOnline ? 'Translation failed — try again' : 'No internet connection', '');
+    setStatus('Translation failed — try again', '');
     clearActive();
+    if (isAuto && autoLoopActive) setTimeout(() => { if (!isSpeaking) autoListen(); }, 1500);
   }
 }
 
-function speak(text, lang) {
+// ── TTS ───────────────────────────────────────────────────────────
+function speak(text, lang, isAuto) {
   window.speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
   utt.lang = lang; utt.rate = 0.93; utt.pitch = 1;
   const voices = window.speechSynthesis.getVoices();
-  const v = voices.find(x => x.lang === lang)
-         || voices.find(x => x.lang.startsWith(lang.split('-')[0]));
+  const v = voices.find(x => x.lang === lang) || voices.find(x => x.lang.startsWith(lang.split('-')[0]));
   if (v) utt.voice = v;
   utt.onstart = () => { isSpeaking = true; setStatus('Speaking...', 'sp'); };
-  utt.onend   = () => { isSpeaking = false; clearActive(); setStatus('Tap a flag to start', ''); };
-  utt.onerror = () => { isSpeaking = false; clearActive(); setStatus('Tap a flag to start', ''); };
+  utt.onend = () => {
+    isSpeaking = false; clearActive();
+    if (isAuto && autoLoopActive) {
+      setStatus('Listening...', 'auto');
+      setTimeout(() => autoListen(), 600);
+    } else {
+      setStatus('Tap a flag to start', '');
+    }
+  };
+  utt.onerror = () => {
+    isSpeaking = false; clearActive();
+    if (isAuto && autoLoopActive) setTimeout(() => autoListen(), 600);
+    else setStatus('Tap a flag to start', '');
+  };
   window.speechSynthesis.speak(utt);
+}
+
+// ── Offline model ─────────────────────────────────────────────────
+let offlineTranslator = null, modelLoading = false;
+const OFFLINE_PAIRS = { 'en-pt': true, 'pt-en': true };
+
+async function offlineTranslate(text, fromLang, toLang) {
+  const pair = fromLang.id + '-' + toLang.id;
+  if (!OFFLINE_PAIRS[pair] || !offlineTranslator) return null;
+  const srcLang = fromLang.id === 'pt' ? 'por_Latn' : 'eng_Latn';
+  const tgtLang = toLang.id   === 'pt' ? 'por_Latn' : 'eng_Latn';
+  const result = await offlineTranslator(text, { src_lang: srcLang, tgt_lang: tgtLang });
+  return result[0]?.translation_text || result[0]?.generated_text || null;
+}
+
+async function loadOfflineModel() {
+  if (offlineTranslator || modelLoading) return;
+  modelLoading = true;
+  updateOfflineBtn('Downloading... 0%');
+  try {
+    const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js');
+    env.allowLocalModels = false; env.useBrowserCache = true;
+    offlineTranslator = await pipeline('translation', 'Xenova/opus-mt-tc-big-en-pt', {
+      progress_callback: (p) => {
+        if (p.status === 'downloading') updateOfflineBtn(`Downloading... ${Math.round(p.progress||0)}%`);
+      }
+    });
+    const btn = document.getElementById('offlineBtn');
+    btn.textContent = '✓ Offline Ready (PT↔EN)';
+    btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
+    btn.onclick = null; btn.style.cursor = 'default';
+  } catch(e) {
+    modelLoading = false; updateOfflineBtn('⬇ Download Offline Model (PT↔EN)');
+  }
+}
+
+function updateOfflineBtn(text) {
+  const btn = document.getElementById('offlineBtn');
+  if (btn) btn.textContent = text;
 }
 
 window.speechSynthesis.getVoices();
