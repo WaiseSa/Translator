@@ -584,13 +584,16 @@ function clearActive() {
 }
 
 function resetBubble(side) {
-  const isTop = side === 'top';
-  const lang = isTop ? topLang : botLang;
-  el(isTop?'tOrig':'bOrig').textContent = appMode==='auto' ? '...' : (lang ? lang.tapHint : '...');
-  el(isTop?'tOrig':'bOrig').className = 'bo dim';
-  el(isTop?'tDiv':'bDiv').className = 'bdiv';
-  el(isTop?'tTrans':'bTrans').className = 'bt ' + (isTop?'tc':'bc');
-  el(isTop?'tCopy':'bCopy').classList.remove('show');
+  // Reset BOTH sides so old translations don't linger
+  ['top','bot'].forEach(s => {
+    const isTop = s === 'top';
+    const lang = isTop ? topLang : botLang;
+    el(isTop?'tOrig':'bOrig').textContent = appMode==='auto' ? '' : (lang ? lang.tapHint : '');
+    el(isTop?'tOrig':'bOrig').className = 'bo dim';
+    el(isTop?'tDiv':'bDiv').className = 'bdiv';
+    el(isTop?'tTrans':'bTrans').className = 'bt ' + (isTop?'tc':'bc');
+    el(isTop?'tCopy':'bCopy').classList.remove('show');
+  });
 }
 
 function showInterim(side, text) {
@@ -599,14 +602,24 @@ function showInterim(side, text) {
 }
 
 function showResult(side, original, translation) {
-  const isTop = side === 'top';
-  el(isTop?'tOrig':'bOrig').textContent = original;
-  el(isTop?'tOrig':'bOrig').className = 'bo';
-  el(isTop?'tDiv':'bDiv').className = 'bdiv show';
-  el(isTop?'tTrans':'bTrans').textContent = translation;
-  el(isTop?'tTrans':'bTrans').className = 'bt show ' + (isTop?'tc':'bc');
-  el(isTop?'tCopy':'bCopy').classList.add('show');
-  lastCopy[side] = translation;
+  const opp = side === 'top' ? 'bot' : 'top';
+
+  // Speaker's side — show what they said (dimmed)
+  el(side==='top'?'tOrig':'bOrig').textContent = original;
+  el(side==='top'?'tOrig':'bOrig').className = 'bo dim';
+  el(side==='top'?'tDiv':'bDiv').className = 'bdiv';
+  el(side==='top'?'tTrans':'bTrans').className = 'bt ' + (side==='top'?'tc':'bc');
+  el(side==='top'?'tCopy':'bCopy').classList.remove('show');
+
+  // Opposite side — show translation prominently
+  el(opp==='top'?'tOrig':'bOrig').textContent = '';
+  el(opp==='top'?'tOrig':'bOrig').className = 'bo';
+  el(opp==='top'?'tDiv':'bDiv').className = 'bdiv';
+  el(opp==='top'?'tTrans':'bTrans').textContent = translation;
+  el(opp==='top'?'tTrans':'bTrans').className = 'bt show ' + (opp==='top'?'tc':'bc');
+  el(opp==='top'?'tCopy':'bCopy').classList.add('show');
+
+  lastCopy[opp] = translation;
   buzz(18);
 }
 
