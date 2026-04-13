@@ -26,16 +26,32 @@ height: 100dvh; padding: 24px 20px; gap: 0;
 .picker-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(–muted); margin-bottom: 10px; padding-left: 2px; }
 .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .lang-btn {
-background: var(–card); border: 1.5px solid var(–border); border-radius: 14px;
+background: var(–card); border: 2px solid var(–border); border-radius: 14px;
 padding: 14px 12px; cursor: pointer; transition: all 0.2s;
-display: flex; align-items: center; gap: 10px;
+display: flex; align-items: center; gap: 10px; position: relative;
 }
 .lang-btn:active { transform: scale(0.97); }
-.lang-btn.selected-top    { border-color: var(–green); background: var(–green-bg); }
-.lang-btn.selected-bottom { border-color: var(–blue);  background: var(–blue-bg); }
+.lang-btn.selected-top {
+border-color: var(–green);
+background: rgba(0,229,160,0.18);
+box-shadow: 0 0 0 1px var(–green), inset 0 0 20px rgba(0,229,160,0.08);
+}
+.lang-btn.selected-bottom {
+border-color: var(–blue);
+background: rgba(77,140,255,0.18);
+box-shadow: 0 0 0 1px var(–blue), inset 0 0 20px rgba(77,140,255,0.08);
+}
+/* checkmark badge */
+.lang-btn.selected-top::after, .lang-btn.selected-bottom::after {
+content: ‘✓’; position: absolute; top: 7px; right: 10px;
+font-size: 13px; font-weight: 800;
+}
+.lang-btn.selected-top::after    { color: var(–green); }
+.lang-btn.selected-bottom::after { color: var(–blue); }
+
 .lang-flag { font-size: 26px; line-height: 1; flex-shrink: 0; }
 .lang-info { text-align: left; }
-.lang-name { font-size: 13px; font-weight: 700; color: var(–text); }
+.lang-name { font-size: 13px; font-weight: 700; color: var(–text); transition: color 0.2s; }
 .lang-sub  { font-size: 10px; color: var(–muted); margin-top: 2px; }
 .lang-btn.selected-top    .lang-name { color: var(–green); }
 .lang-btn.selected-bottom .lang-name { color: var(–blue); }
